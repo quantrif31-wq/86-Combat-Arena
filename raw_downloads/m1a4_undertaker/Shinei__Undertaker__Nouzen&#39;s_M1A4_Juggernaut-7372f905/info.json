@@ -1,0 +1,12 @@
+{
+  "uid": "7372f905d4534e9c90b94abc2bc36637",
+  "name": "Shinei \"Undertaker\" Nouzen&#39;s M1A4 Juggernaut",
+  "file_name": "Shinei__Undertaker__Nouzen&#39;s_M1A4_Juggernaut",
+  "author": "Phuriphan3D",
+  "description": "Produced as part of a University Assignment.\nLow Poly game model.\n2048 x 2048 textures.\nUsed AUTODESK MAYA, Adobe Substance 3D Painter, and Adobe Photoshop.\nIt uses 5 UDIMs, sadly SketchFab doesn&#39;t support it.\nI will put this up on my ArtStation with renders soon with the textures.",
+  "source_url": "https://sketchfab.com/3d-models/7372f905d4534e9c90b94abc2bc36637",
+  "output": "c:\\86\\raw_downloads\\m1a4_undertaker\\Shinei__Undertaker__Nouzen&#39;s_M1A4_Juggernaut-7372f905\\Shinei__Undertaker__Nouzen&#39;s_M1A4_Juggernaut.gltf",
+  "format": "gltf",
+  "textures": 1,
+  "note": "Prefer glTF via osgconv; fallback pure-python glTF; textures in textures/"
+}

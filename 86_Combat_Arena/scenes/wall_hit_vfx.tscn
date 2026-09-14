@@ -1,0 +1,77 @@
+[gd_scene load_steps=7 format=3 uid="uid://c_wall_vfx_01"]
+
+[ext_resource type="Script" path="res://scripts/wall_hit_vfx.gd" id="1_wfx"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_wall"]
+emission_shape = 1
+emission_sphere_radius = 0.25
+direction = Vector3(0, 1, 0)
+spread = 80.0
+initial_velocity_min = 5.0
+initial_velocity_max = 11.0
+gravity = Vector3(0, -12.0, 0)
+scale_min = 0.12
+scale_max = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+shading_mode = 0
+albedo_color = Color(0.75, 0.70, 0.60, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(0.15, 0.15, 0.15)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dust"]
+emission_shape = 1
+emission_sphere_radius = 0.4
+direction = Vector3(0, 1, 0)
+spread = 60.0
+initial_velocity_min = 1.8
+initial_velocity_max = 3.6
+gravity = Vector3(0, 0.4, 0)
+scale_min = 0.5
+scale_max = 1.8
+color = Color(0.65, 0.62, 0.55, 0.7)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dust"]
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.65, 0.62, 0.55, 0.6)
+
+[sub_resource type="SphereMesh" id="SphereMesh_dust"]
+material = SubResource("StandardMaterial3D_dust")
+radius = 0.3
+height = 0.6
+radial_segments = 6
+rings = 4
+
+[node name="WallHitVFX" type="Node3D"]
+script = ExtResource("1_wfx")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+emitting = true
+amount = 20
+lifetime = 0.6
+one_shot = true
+explosiveness = 0.95
+process_material = SubResource("ParticleProcessMaterial_wall")
+draw_pass_1 = SubResource("BoxMesh_wall")
+
+[node name="DustParticles" type="GPUParticles3D" parent="."]
+emitting = true
+amount = 12
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.85
+process_material = SubResource("ParticleProcessMaterial_dust")
+draw_pass_1 = SubResource("SphereMesh_dust")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+light_color = Color(1, 0.85, 0.4, 1)
+light_energy = 4.0
+omni_range = 6.0
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+unit_size = 14.0
+max_distance = 100.0
+

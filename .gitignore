@@ -1,0 +1,16 @@
+# Godot 4+ cache & imports
+.godot/
+*/.godot/
+
+# Blender auto-save backups
+*.blend1
+*.blend2
+*.blend@
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+*.tmp

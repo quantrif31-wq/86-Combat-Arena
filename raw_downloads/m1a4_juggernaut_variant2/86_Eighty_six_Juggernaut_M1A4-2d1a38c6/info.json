@@ -1,0 +1,12 @@
+{
+  "uid": "2d1a38c6849e46cb912e5b52d21b1ea8",
+  "name": "86 Eighty six Juggernaut M1A4",
+  "file_name": "86_Eighty_six_Juggernaut_M1A4",
+  "author": "Falapax",
+  "description": "![preview](https://i.imgur.com/OF4Vu2g.jpeg)\nThis is the final version: https://sketchfab.com/3d-models/86-eighty-six-juggernaut-shourei-nouzen-dullahan-3028c334ecd3436499e26360244b06b1\n![Imagen](https://i.imgur.com/86kMlKJ.jpg)\nThis is the fine version of Shin: https://sketchfab.com/3d-models/86-eighty-six-juggernaut-shinei-nouzen-55e401f983df4188bcabb1ed0d77b0e0",
+  "source_url": "https://sketchfab.com/3d-models/2d1a38c6849e46cb912e5b52d21b1ea8",
+  "output": "c:\\86\\raw_downloads\\m1a4_juggernaut_variant2\\86_Eighty_six_Juggernaut_M1A4-2d1a38c6\\86_Eighty_six_Juggernaut_M1A4.gltf",
+  "format": "gltf",
+  "textures": 1,
+  "note": "Prefer glTF via osgconv; fallback pure-python glTF; textures in textures/"
+}

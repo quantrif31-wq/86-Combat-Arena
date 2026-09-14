@@ -1,0 +1,53 @@
+[gd_scene load_steps=5 format=3 uid="uid://c_ply_jug_01"]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_ply"]
+[ext_resource type="PackedScene" path="res://assets/models/m1a4_juggernaut_player.glb" id="2_mesh"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ply"]
+radius = 1.25
+height = 2.2
+
+[node name="PlayerJuggernaut" type="CharacterBody3D" groups=["player", "damageable"]]
+collision_layer = 1
+collision_mask = 3
+floor_stop_on_slope = true
+floor_constant_speed = true
+floor_max_angle = 1.0472
+floor_snap_length = 0.6
+safe_margin = 0.08
+script = ExtResource("1_ply")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("CapsuleShape3D_ply")
+
+[node name="ModelInstance" parent="." instance=ExtResource("2_mesh")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8427, -2.6)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+spring_length = 5.2
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+current = false
+fov = 75.0
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+volume_db = 2.0
+unit_size = 16.0
+max_distance = 120.0
+
+[node name="FootstepAudioPlayer3D" type="AudioStreamPlayer3D" parent="."]
+volume_db = -10.0
+unit_size = 6.0
+max_distance = 45.0
+
+[node name="FPSCamera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.994522, 0.104528, 0, -0.104528, 0.994522, 0, 1.32, -0.68)
+current = true
+fov = 82.0

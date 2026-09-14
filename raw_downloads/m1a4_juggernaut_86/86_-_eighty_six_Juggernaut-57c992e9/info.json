@@ -1,0 +1,12 @@
+{
+  "uid": "57c992e9e21245be92b67f8d0c939576",
+  "name": "86 - eighty six Juggernaut",
+  "file_name": "86_-_eighty_six_Juggernaut",
+  "author": "leoxx300",
+  "description": "86 - eighty six Juggernaut",
+  "source_url": "https://sketchfab.com/3d-models/57c992e9e21245be92b67f8d0c939576",
+  "output": "c:\\86\\raw_downloads\\m1a4_juggernaut_86\\86_-_eighty_six_Juggernaut-57c992e9\\86_-_eighty_six_Juggernaut.gltf",
+  "format": "gltf",
+  "textures": 25,
+  "note": "Prefer glTF via osgconv; fallback pure-python glTF; textures in textures/"
+}

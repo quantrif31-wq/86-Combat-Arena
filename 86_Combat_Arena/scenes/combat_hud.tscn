@@ -1,0 +1,365 @@
+[gd_scene load_steps=7 format=3 uid="uid://c_hud_01"]
+
+[ext_resource type="Script" path="res://scripts/combat_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/cockpit_visor_hud.gd" id="2_visor"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
+bg_color = Color(0.10, 0.12, 0.16, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.65, 0.85, 0.45)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fg"]
+bg_color = Color(0.2, 0.85, 1.0, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_enm_fg"]
+bg_color = Color(0.95, 0.22, 0.2, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_banner"]
+bg_color = Color(0.05, 0.06, 0.08, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.7, 0.9, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="CombatHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_hud")
+
+[node name="DamageVignette" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.7, 0.05, 0.05, 0.35)
+
+[node name="CockpitOverlay" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CanopyTint" type="ColorRect" parent="CockpitOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.06, 0.12, 0.06)
+
+[node name="CockpitVisor" type="Control" parent="CockpitOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_visor")
+
+[node name="TopLeft" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 28.0
+offset_top = 18.0
+offset_right = 320.0
+offset_bottom = 85.0
+
+[node name="VBox" type="VBoxContainer" parent="TopLeft"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="HeaderLabel" type="Label" parent="TopLeft/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "PARA-RAID // CALLSIGN: UNDERTAKER"
+
+[node name="PlayerHPBar" type="ProgressBar" parent="TopLeft/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fg")
+value = 100.0
+show_percentage = false
+
+[node name="PlayerHPLabel" type="Label" parent="TopLeft/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "M1A4 INTEGRITY: 100 / 100"
+
+[node name="TopCenterHostile" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 18.0
+offset_right = 160.0
+offset_bottom = 85.0
+grow_horizontal = 2
+
+[node name="VBox" type="VBoxContainer" parent="TopCenterHostile"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="HostileLabel" type="Label" parent="TopCenterHostile/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "RADAR TRACK // HOSTILE TARGET"
+horizontal_alignment = 1
+
+[node name="EnemyHPBar" type="ProgressBar" parent="TopCenterHostile/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_enm_fg")
+value = 100.0
+show_percentage = false
+
+[node name="EnemyHPLabel" type="Label" parent="TopCenterHostile/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.85, 0.85, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "HOSTILE JUGGERNAUT: 120 / 120"
+horizontal_alignment = 1
+
+[node name="BottomRight" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -280.0
+offset_top = -60.0
+offset_right = -28.0
+offset_bottom = -15.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="VBox" type="VBoxContainer" parent="BottomRight"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ReloadLabel" type="Label" parent="BottomRight/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "57mm CANNON: [READY]"
+
+[node name="ReloadBar" type="ProgressBar" parent="BottomRight/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fg")
+value = 100.0
+show_percentage = false
+
+[node name="BottomLeft" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -60.0
+offset_right = 450.0
+offset_bottom = -15.0
+grow_vertical = 0
+
+[node name="ControlsLabel" type="Label" parent="BottomLeft"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.6, 0.75, 0.85, 0.75)
+theme_override_font_sizes/font_size = 11
+text = "WASD: Maneuver | Shift: Overdrive | Hold RMB: Free-Look 3rd Person
+L-Click: Fire 57mm APFSDS | V: Toggle Cockpit | R: Reset"
+
+[node name="CenterCrosshair" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRectL" type="ColorRect" parent="CenterCrosshair"]
+layout_mode = 0
+offset_left = -16.0
+offset_top = -1.0
+offset_right = -6.0
+offset_bottom = 1.0
+color = Color(0.3, 0.9, 1, 0.8)
+
+[node name="ColorRectR" type="ColorRect" parent="CenterCrosshair"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = -1.0
+offset_right = 16.0
+offset_bottom = 1.0
+color = Color(0.3, 0.9, 1, 0.8)
+
+[node name="ColorRectT" type="ColorRect" parent="CenterCrosshair"]
+layout_mode = 0
+offset_left = -1.0
+offset_top = -16.0
+offset_right = 1.0
+offset_bottom = -6.0
+color = Color(0.3, 0.9, 1, 0.8)
+
+[node name="ColorRectB" type="ColorRect" parent="CenterCrosshair"]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 6.0
+offset_right = 1.0
+offset_bottom = 16.0
+color = Color(0.3, 0.9, 1, 0.8)
+
+[node name="Dot" type="ColorRect" parent="CenterCrosshair"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+color = Color(0.3, 0.9, 1, 0.9)
+
+[node name="ScopeOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScopeTint" type="ColorRect" parent="ScopeOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.1, 0.12, 0.25)
+
+[node name="BannerBox" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -70.0
+offset_right = 260.0
+offset_bottom = 70.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_banner")
+
+[node name="Margin" type="MarginContainer" parent="BannerBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="BannerBox/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="BannerTitle" type="Label" parent="BannerBox/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 24
+text = "MISSION ACCOMPLISHED"
+horizontal_alignment = 1
+
+[node name="BannerSubtitle" type="Label" parent="BannerBox/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
+text = "HOSTILE UNIT NEUTRALIZED\nPress [R] to Re-deploy"
+horizontal_alignment = 1
+
+[node name="CriticalWarningBox" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -145.0
+offset_right = 220.0
+offset_bottom = -115.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="WarningLabel" type="Label" parent="CriticalWarningBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.25, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "/// CAUTION: HULL INTEGRITY CRITICAL ///"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AlarmAudioPlayer" type="AudioStreamPlayer" parent="."]
+volume_db = -2.0
