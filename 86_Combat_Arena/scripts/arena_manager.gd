@@ -48,12 +48,24 @@ func setup_battlefield_collisions() -> void:
 	if not target_root:
 		return
 		
-	# Consolidate 520 pine trees into 1 single MultiMeshInstance3D (1 draw call instead of 520!)
+	# 1. Consolidate 487 pine trees into 1 MultiMeshInstance3D (1 draw call)
 	_optimize_pine_trees_multimesh(target_root)
+	
+	# 2. Consolidate 48 boulders into 1 MultiMeshInstance3D
+	_optimize_props_into_multimesh(target_root, "boulder", "Boulders_MultiMesh", "Boulders_CompoundCollider", "sphere", Vector3(2.2, 0, 0))
+	
+	# 3. Consolidate 40 fallen logs into 1 MultiMeshInstance3D
+	_optimize_props_into_multimesh(target_root, "fallen", "FallenLogs_MultiMesh", "FallenLogs_CompoundCollider", "box", Vector3(1.4, 1.2, 7.0))
+	
+	# 4. Consolidate 8 concrete barriers into 1 MultiMeshInstance3D
+	_optimize_props_into_multimesh(target_root, "barrier", "Barriers_MultiMesh", "Barriers_CompoundCollider", "box", Vector3(3.6, 1.4, 1.2))
+	
+	# 5. Consolidate 9 perimeter fences into 1 MultiMeshInstance3D
+	_optimize_props_into_multimesh(target_root, "fence", "Fences_MultiMesh", "Fences_CompoundCollider", "box", Vector3(4.2, 2.8, 0.4))
 		
 	for child in target_root.get_children():
 		var cname = child.name.to_lower()
-		if "pine" in cname:
+		if child.is_queued_for_deletion() or "pine" in cname or "boulder" in cname or "fallen" in cname or "barrier" in cname or "fence" in cname or "multimesh" in cname or "compoundcollider" in cname:
 			continue
 			
 		var geom = child as GeometryInstance3D
@@ -62,15 +74,15 @@ func setup_battlefield_collisions() -> void:
 		# 1. GRAPHICS & PERFORMANCE OPTIMIZATION PASS (LOD DISTANCE & SHADOWS)
 		# =====================================================================
 		if geom:
-			# Small props (ammo crates, fences, road barriers): Cull beyond 180m, no distant shadows
-			if "fence" in cname or "ammo" in cname or "barrier" in cname:
+			# Small props (ammo crates): Cull beyond 180m, no distant shadows
+			if "ammo" in cname:
 				geom.visibility_range_end = 180.0
 				geom.visibility_range_end_margin = 25.0
 				geom.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 				geom.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				
-			# Medium props (fallen logs, rock piles, pipeline sections, boulders): Cull beyond 260m
-			elif "log" in cname or "dead" in cname or "rock" in cname or "boulder" in cname or "pipe" in cname:
+			# Medium props (rock piles, pipeline sections): Cull beyond 260m
+			elif "rock" in cname or "pipe" in cname:
 				geom.visibility_range_end = 260.0
 				geom.visibility_range_end_margin = 30.0
 				geom.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
@@ -110,47 +122,7 @@ func setup_battlefield_collisions() -> void:
 			child.create_trimesh_collision()
 			_configure_static_body(child)
 			
-		# 6. Pine trees: Trunk cylinder collider
-		elif "pine" in cname:
-			var body = StaticBody3D.new()
-			body.collision_layer = 1
-			body.collision_mask = 0
-			var col = CollisionShape3D.new()
-			var cyl = CylinderShape3D.new()
-			cyl.radius = 0.65
-			cyl.height = 24.0
-			col.shape = cyl
-			col.position = Vector3(0, 12.0, 0)
-			body.add_child(col)
-			child.add_child(body)
-			
-		# 7. Concrete Barriers
-		elif "barrier" in cname:
-			var body = StaticBody3D.new()
-			body.collision_layer = 1
-			body.collision_mask = 0
-			var col = CollisionShape3D.new()
-			var box = BoxShape3D.new()
-			box.size = Vector3(3.6, 1.4, 1.2)
-			col.shape = box
-			col.position = Vector3(0, 0.7, 0)
-			body.add_child(col)
-			child.add_child(body)
-			
-		# 8. Perimeter Chainlink Fences
-		elif "fence" in cname:
-			var body = StaticBody3D.new()
-			body.collision_layer = 1
-			body.collision_mask = 0
-			var col = CollisionShape3D.new()
-			var box = BoxShape3D.new()
-			box.size = Vector3(4.2, 2.8, 0.4)
-			col.shape = box
-			col.position = Vector3(0, 1.4, 0)
-			body.add_child(col)
-			child.add_child(body)
-			
-		# 9. Industrial Pipeline Networks
+		# 6. Industrial Pipeline Networks
 		elif "pipe" in cname:
 			var body = StaticBody3D.new()
 			body.collision_layer = 1
@@ -164,45 +136,7 @@ func setup_battlefield_collisions() -> void:
 			body.add_child(col)
 			child.add_child(body)
 			
-		# 10. Giant Boulders & Mossy Rocks
-		elif "boulder" in cname:
-			var body = StaticBody3D.new()
-			body.collision_layer = 1
-			body.collision_mask = 0
-			var col = CollisionShape3D.new()
-			var sphere = SphereShape3D.new()
-			sphere.radius = 2.4
-			col.shape = sphere
-			col.position = Vector3(0, 1.2, 0)
-			body.add_child(col)
-			child.add_child(body)
-			
-		elif "rock" in cname:
-			var body = StaticBody3D.new()
-			body.collision_layer = 1
-			body.collision_mask = 0
-			var col = CollisionShape3D.new()
-			var sphere = SphereShape3D.new()
-			sphere.radius = 1.5
-			col.shape = sphere
-			col.position = Vector3(0, 0.8, 0)
-			body.add_child(col)
-			child.add_child(body)
-			
-		# 11. Fallen Mossy Logs
-		elif "log" in cname or "dead" in cname:
-			var body = StaticBody3D.new()
-			body.collision_layer = 1
-			body.collision_mask = 0
-			var col = CollisionShape3D.new()
-			var box = BoxShape3D.new()
-			box.size = Vector3(1.4, 1.2, 7.0)
-			col.shape = box
-			col.position = Vector3(0, 0.6, 0)
-			body.add_child(col)
-			child.add_child(body)
-			
-		# 12. Ammo Caches & Supply Crates
+		# 7. Ammo Caches & Supply Crates
 		elif "ammo" in cname:
 			var body = StaticBody3D.new()
 			body.collision_layer = 1
@@ -227,7 +161,7 @@ func _optimize_pine_trees_multimesh(target_root: Node3D) -> void:
 	
 	for child in target_root.get_children():
 		var cname = child.name.to_lower()
-		if "pine" in cname and child is MeshInstance3D:
+		if "pine" in cname and child is MeshInstance3D and not child.is_queued_for_deletion():
 			pine_nodes.append(child)
 			if not shared_mesh and child.mesh:
 				shared_mesh = child.mesh
@@ -253,13 +187,11 @@ func _optimize_pine_trees_multimesh(target_root: Node3D) -> void:
 		var p_node = pine_nodes[i]
 		mm.set_instance_transform(i, p_node.transform)
 		
-		# Clean unscaled cylinder collider centered at mecha height (y = 2.0m)
 		var col = CollisionShape3D.new()
 		col.shape = cyl_shape
 		col.transform = Transform3D(Basis(), Vector3(p_node.transform.origin.x, p_node.transform.origin.y + 2.0, p_node.transform.origin.z))
 		compound_body.add_child(col)
 		
-		# Free individual node
 		p_node.queue_free()
 		
 	var mm_inst = MultiMeshInstance3D.new()
@@ -269,3 +201,57 @@ func _optimize_pine_trees_multimesh(target_root: Node3D) -> void:
 	target_root.add_child(mm_inst)
 	target_root.add_child(compound_body)
 	print("OPTIMIZATION: Successfully consolidated ", pine_nodes.size(), " pine trees into 1 MultiMeshInstance3D!")
+
+func _optimize_props_into_multimesh(target_root: Node3D, name_filter: String, multimesh_name: String, collider_name: String, shape_type: String, shape_dims: Vector3) -> void:
+	var nodes: Array[MeshInstance3D] = []
+	var shared_mesh: Mesh = null
+	
+	for child in target_root.get_children():
+		var cname = child.name.to_lower()
+		if name_filter in cname and child is MeshInstance3D and not child.is_queued_for_deletion():
+			nodes.append(child)
+			if not shared_mesh and child.mesh:
+				shared_mesh = child.mesh
+				
+	if nodes.size() == 0 or not shared_mesh:
+		return
+		
+	var mm = MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = shared_mesh
+	mm.instance_count = nodes.size()
+	
+	var compound_body = StaticBody3D.new()
+	compound_body.collision_layer = 1
+	compound_body.collision_mask = 0
+	compound_body.name = collider_name
+	
+	var shape_res: Shape3D = null
+	if shape_type == "sphere":
+		var s = SphereShape3D.new()
+		s.radius = shape_dims.x
+		shape_res = s
+	elif shape_type == "box":
+		var b = BoxShape3D.new()
+		b.size = shape_dims
+		shape_res = b
+		
+	for i in range(nodes.size()):
+		var n = nodes[i]
+		mm.set_instance_transform(i, n.transform)
+		
+		if shape_res:
+			var col = CollisionShape3D.new()
+			col.shape = shape_res
+			col.transform = n.transform
+			compound_body.add_child(col)
+			
+		n.queue_free()
+		
+	var mm_inst = MultiMeshInstance3D.new()
+	mm_inst.name = multimesh_name
+	mm_inst.multimesh = mm
+	mm_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	target_root.add_child(mm_inst)
+	target_root.add_child(compound_body)
+	print("OPTIMIZATION: Successfully consolidated ", nodes.size(), " ", name_filter, " props into ", multimesh_name, "!")

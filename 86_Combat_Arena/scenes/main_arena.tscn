@@ -23,7 +23,15 @@ ambient_light_energy = 0.55
 tonemap_mode = 2
 tonemap_exposure = 1.0
 glow_enabled = true
-glow_bloom = 0.15
+glow_levels/1 = 0.0
+glow_levels/2 = 0.0
+glow_levels/3 = 1.0
+glow_levels/4 = 0.0
+glow_levels/5 = 1.0
+glow_levels/6 = 0.0
+glow_levels/7 = 0.0
+glow_intensity = 0.8
+glow_bloom = 0.12
 fog_enabled = true
 fog_light_color = Color(0.015, 0.03, 0.06, 1)
 fog_density = 0.0016
@@ -47,7 +55,7 @@ light_color = Color(0.62, 0.74, 0.96, 1)
 light_energy = 0.38
 shadow_enabled = true
 directional_shadow_mode = 2
-directional_shadow_max_distance = 90.0
+directional_shadow_max_distance = 65.0
 directional_shadow_blend_splits = true
 
 [node name="Sector86_Grand_Warzone" parent="." instance=ExtResource("5_battlefield")]

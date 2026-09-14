@@ -25,7 +25,21 @@ func _process(delta: float) -> bool:
 		print("  - Average FPS: ", int(avg_fps), " FPS")
 		print("  - Average Frametime: ", "%.2f" % (avg_delta * 1000.0), " ms")
 		print("  - Peak Frametime: ", "%.2f" % (max_frame_time * 1000.0), " ms")
-		print("  - Static Objects in Scene: ", root.get_node("MainArena/Sector86_Grand_Warzone").get_child_count())
+		var wz = root.get_node("MainArena/Sector86_Grand_Warzone")
+		print("  - Static Objects in Scene: ", wz.get_child_count())
+		var counts = {}
+		var meshes = {}
+		for c in wz.get_children():
+			var p = c.name.split("_")[0]
+			counts[p] = counts.get(p, 0) + 1
+			if c is MeshInstance3D and c.mesh:
+				if not meshes.has(p):
+					meshes[p] = []
+				if not meshes[p].has(c.mesh):
+					meshes[p].append(c.mesh)
+		for k in counts.keys():
+			var m_count = meshes.get(k, []).size()
+			print("    * ", k, ": ", counts[k], " (distinct meshes: ", m_count, ")")
 		print("--- BENCHMARK COMPLETE ---")
 		quit(0)
 		return true

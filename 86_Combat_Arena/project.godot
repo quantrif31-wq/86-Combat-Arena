@@ -72,7 +72,16 @@ toggle_camera={
 }
 
 
+[physics]
+
+common/physics_ticks_per_second=60
+common/max_physics_steps_per_frame=4
+
 [rendering]
 
 renderer/rendering_method="forward_plus"
 renderer/rendering_method.mobile="mobile"
+scaling_3d/mode=1
+scaling_3d/scale=0.92
+scaling_3d/fsr_sharpness=0.25
+anti_aliasing/quality/screen_space_aa=1
