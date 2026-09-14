@@ -24,6 +24,7 @@ class_name CombatHUD
 
 var player_ref: CharacterBody3D = null
 var enemy_ref: CharacterBody3D = null
+var all_enemies: Array[CharacterBody3D] = []
 var vignette_alpha: float = 0.0
 var is_critical_hp: bool = false
 var alarm_cooldown: float = 0.0
@@ -76,6 +77,15 @@ func bind_enemy(enemy: CharacterBody3D) -> void:
 	if not enemy.enemy_died.is_connected(_on_enemy_died):
 		enemy.enemy_died.connect(_on_enemy_died)
 
+func set_all_enemies(enemies_list: Array[CharacterBody3D]) -> void:
+	all_enemies = enemies_list
+	if cockpit_visor and cockpit_visor.has_method("set_all_enemies"):
+		cockpit_visor.set_all_enemies(enemies_list)
+	for e in all_enemies:
+		if is_instance_valid(e):
+			if not e.hp_changed.is_connected(_on_enemy_hp_changed):
+				e.hp_changed.connect(_on_enemy_hp_changed)
+
 func _on_camera_mode_changed(is_fps: bool) -> void:
 	if cockpit_overlay:
 		cockpit_overlay.visible = is_fps
@@ -87,6 +97,21 @@ func _on_camera_mode_changed(is_fps: bool) -> void:
 		bottom_left_box.visible = not is_fps
 
 func _process(delta: float) -> void:
+	# Dynamically target closest living hostile
+	var closest_d: float = 999999.0
+	var best_e: CharacterBody3D = null
+	for e in all_enemies:
+		if is_instance_valid(e) and not e.is_dead and player_ref:
+			var d = player_ref.global_position.distance_to(e.global_position)
+			if d < closest_d:
+				closest_d = d
+				best_e = e
+	if best_e and best_e != enemy_ref:
+		enemy_ref = best_e
+		if cockpit_visor:
+			cockpit_visor.enemy_ref = best_e
+		_update_enemy_ui(best_e)
+
 	# Update damage vignette fade
 	if vignette_alpha > 0.0:
 		vignette_alpha = maxf(0.0, vignette_alpha - delta * 2.5)
@@ -112,6 +137,13 @@ func _process(delta: float) -> void:
 	# Check for restart input
 	if banner_box and banner_box.visible and Input.is_action_just_pressed("restart_game"):
 		get_tree().reload_current_scene()
+
+func _update_enemy_ui(e: CharacterBody3D) -> void:
+	if not enemy_hp_bar or not enemy_hp_label:
+		return
+	enemy_hp_bar.max_value = e.max_hp
+	enemy_hp_bar.value = e.current_hp
+	enemy_hp_label.text = "HOSTILE JUGGERNAUT: %d / %d" % [int(e.current_hp), int(e.max_hp)]
 
 func _on_player_hp_changed(cur: float, max_v: float) -> void:
 	if not player_hp_bar or not player_hp_label:
@@ -153,7 +185,10 @@ func _on_player_died() -> void:
 	banner_subtitle.text = "PILOT KIA IN SECTOR 86\nPress [R] to Re-deploy"
 
 func _on_enemy_died() -> void:
+	pass
+
+func show_victory_banner() -> void:
 	banner_box.visible = true
 	banner_title.text = "MISSION ACCOMPLISHED"
 	banner_title.modulate = Color(0.3, 1.0, 0.6)
-	banner_subtitle.text = "HOSTILE UNIT NEUTRALIZED\nPress [R] to Re-deploy"
+	banner_subtitle.text = "ALL HOSTILE FORCES IN SECTOR 86 NEUTRALIZED\nPress [R] to Re-deploy"

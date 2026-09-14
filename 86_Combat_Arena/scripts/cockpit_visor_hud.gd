@@ -3,6 +3,7 @@ class_name CockpitVisorHUD
 
 var player_ref: CharacterBody3D = null
 var enemy_ref: CharacterBody3D = null
+var all_enemies: Array[CharacterBody3D] = []
 
 var heading_deg: float = 0.0
 var cannon_pitch_deg: float = 0.0
@@ -14,6 +15,26 @@ var reload_ratio: float = 1.0
 
 var pulse_timer: float = 0.0
 var radar_sweep_angle: float = 0.0
+
+func set_all_enemies(list: Array[CharacterBody3D]) -> void:
+	all_enemies = list
+
+func get_sector_name() -> String:
+	if not player_ref or not is_instance_valid(player_ref):
+		return "SECTOR 86 // COMBAT ZONE"
+	var p = player_ref.global_position
+	# North is -Z, South is +Z, West is -X, East is +X
+	if p.z < -60.0 and abs(p.x) < 130.0:
+		return "SECTOR 86 // THE IRON CITADEL RUINS"
+	elif p.x < -100.0:
+		return "SECTOR 86 // HEAVY FOUNDRY & FACTORY RUINS"
+	elif p.x > 100.0:
+		return "SECTOR 86 // TRENCH & BUNKER REDOUBT"
+	elif p.z > 50.0 and p.z < 110.0:
+		return "SECTOR 86 // DRIED RAVINE & VIADUCT BRIDGE"
+	elif p.z >= 110.0:
+		return "SECTOR 86 // THE GREAT CONIFER FOREST"
+	return "SECTOR 86 // NO MAN'S LAND"
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -30,6 +51,17 @@ func _process(delta: float) -> void:
 		cannon_yaw_deg = rad_to_deg(player_ref.current_turret_yaw)
 		is_reloading = (player_ref.reload_timer > 0.0)
 		reload_ratio = 1.0 - clampf(player_ref.reload_timer / player_ref.cannon_cooldown, 0.0, 1.0)
+		
+		var min_d: float = 999999.0
+		var best_e: CharacterBody3D = null
+		for e in all_enemies:
+			if is_instance_valid(e) and not e.is_dead:
+				var d = player_ref.global_position.distance_to(e.global_position)
+				if d < min_d:
+					min_d = d
+					best_e = e
+		if best_e:
+			enemy_ref = best_e
 		
 	if player_ref and enemy_ref and is_instance_valid(enemy_ref):
 		enemy_dist = player_ref.global_position.distance_to(enemy_ref.global_position)
@@ -321,6 +353,12 @@ func _draw() -> void:
 			
 	var heading_str = "%05.2f" % heading_deg
 	var apex_pos = Vector2(cx, h_c.y - h_r)
+	
+	# Tactical Sector Location Banner
+	var sector_label = get_sector_name()
+	draw_string(font, apex_pos + Vector2(-150.0, -28.0), sector_label, HORIZONTAL_ALIGNMENT_CENTER, 300, 12, cyan_bright)
+	draw_line(apex_pos + Vector2(-110.0, -18.0), apex_pos + Vector2(110.0, -18.0), cyan_dim, 1.0)
+	
 	draw_string(font, apex_pos + Vector2(-22.0, -4.0), heading_str, HORIZONTAL_ALIGNMENT_CENTER, -1, 12, cyan_bright)
 	draw_line(apex_pos + Vector2(-28.0, -12.0), apex_pos + Vector2(-28.0, 1.0), cyan, 1.5)
 	draw_line(apex_pos + Vector2(-28.0, -12.0), apex_pos + Vector2(-23.0, -12.0), cyan, 1.5)
@@ -387,12 +425,21 @@ func _draw() -> void:
 	draw_string(font, radar_c + Vector2(-r_outer - 28.0, 4.0), "(S)", HORIZONTAL_ALIGNMENT_RIGHT, -1, 10, cyan)
 	draw_string(font, radar_c + Vector2(-26.0, r_outer + 18.0), "%05.2f m" % enemy_dist, HORIZONTAL_ALIGNMENT_CENTER, -1, 11, cyan_bright)
 	
-	if enemy_ref and is_instance_valid(enemy_ref):
-		var blip_pos = radar_c + Vector2(sin(enemy_bearing_rad), -cos(enemy_bearing_rad)) * r_inner
-		var pulse_glow = 3.8 + sin(pulse_timer) * 1.0
-		draw_circle(blip_pos, pulse_glow + 3.0, Color(1.0, 0.2, 0.2, 0.35))
-		draw_circle(blip_pos, pulse_glow, Color(1.0, 0.3, 0.3, 0.95))
-		draw_circle(blip_pos, 1.8, Color(1.0, 0.9, 0.9, 1.0))
+	# Draw radar blips for all active hostile units
+	var drawn_enemies = all_enemies if all_enemies.size() > 0 else ([enemy_ref] if enemy_ref else [])
+	for enm in drawn_enemies:
+		if enm and is_instance_valid(enm) and not enm.is_dead and player_ref:
+			var to_e = enm.global_position - player_ref.global_position
+			to_e.y = 0.0
+			var dist_e = to_e.length()
+			var local_e = player_ref.global_transform.basis.inverse() * to_e.normalized()
+			var b_rad = atan2(local_e.x, -local_e.z)
+			var dist_norm = clampf(dist_e / 450.0, 0.25, 1.0)
+			var blip_pos = radar_c + Vector2(sin(b_rad), -cos(b_rad)) * (r_inner * dist_norm)
+			var pulse_glow = 3.6 + sin(pulse_timer) * 0.9
+			draw_circle(blip_pos, pulse_glow + 2.5, Color(1.0, 0.2, 0.2, 0.35))
+			draw_circle(blip_pos, pulse_glow, Color(1.0, 0.3, 0.3, 0.95))
+			draw_circle(blip_pos, 1.8, Color(1.0, 0.9, 0.9, 1.0))
 		
 	# =========================================================================
 	# 7. HOLOGRAPHIC VISOR: LOWER-LEFT WEAPON & AMMO COMPUTER FAN

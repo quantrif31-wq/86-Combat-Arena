@@ -8,8 +8,8 @@ signal died()
 signal camera_mode_changed(is_fps: bool)
 signal telemetry_updated(cannon_pitch_deg: float, turret_yaw_deg: float)
 
-@export var walk_speed: float = 6.5
-@export var run_speed: float = 12.0
+@export var walk_speed: float = 8.0
+@export var run_speed: float = 16.0
 @export var mouse_sensitivity: float = 0.0025
 @export var max_hp: float = 100.0
 @export var cannon_cooldown: float = 1.8
@@ -97,6 +97,10 @@ func _ready() -> void:
 	# Default to First-Person Cockpit view
 	is_fps_mode = true
 	is_free_looking = false
+	if fps_camera:
+		fps_camera.far = 2500.0
+	if camera:
+		camera.far = 2500.0
 	update_camera_and_mesh_visibility()
 
 func update_camera_and_mesh_visibility() -> void:

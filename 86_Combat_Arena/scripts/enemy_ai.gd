@@ -11,8 +11,9 @@ enum State { PATROL, ENGAGE, DEAD }
 @export var combat_speed: float = 6.8
 @export var turn_speed: float = 2.8
 @export var fire_cooldown: float = 2.4
-@export var attack_range: float = 60.0
+@export var attack_range: float = 140.0
 
+var is_dead: bool = false
 var current_hp: float = 120.0
 var current_state: State = State.PATROL
 var fire_timer: float = 1.0
@@ -385,6 +386,7 @@ func take_damage(amount: float, attacker: Node = null) -> void:
 		die()
 
 func die() -> void:
+	is_dead = true
 	current_state = State.DEAD
 	velocity = Vector3.ZERO
 	if anim_player:
