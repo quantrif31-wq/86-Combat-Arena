@@ -1,7 +1,22 @@
-[gd_scene load_steps=7 format=3 uid="uid://c_hud_01"]
+[gd_scene load_steps=9 format=3 uid="uid://c_hud_01"]
 
 [ext_resource type="Script" path="res://scripts/combat_hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/cockpit_visor_hud.gd" id="2_visor"]
+[ext_resource type="Shader" path="res://shaders/night_vision.gdshader" id="3_nvg_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nvg"]
+shader = ExtResource("3_nvg_shader")
+shader_parameter/nvg_enabled = true
+shader_parameter/night_vision_gain = 2.8
+shader_parameter/gamma_exp = 0.72
+shader_parameter/noise_amount = 0.075
+shader_parameter/scanline_density = 520.0
+shader_parameter/scanline_intensity = 0.045
+shader_parameter/vignette_radius = 0.92
+shader_parameter/vignette_softness = 0.38
+shader_parameter/phosphor_dark = Color(0.015, 0.095, 0.035, 1)
+shader_parameter/phosphor_bright = Color(0.28, 0.98, 0.42, 1)
+shader_parameter/phosphor_hot = Color(0.88, 1, 0.92, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
 bg_color = Color(0.10, 0.12, 0.16, 0.8)
@@ -60,6 +75,16 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.7, 0.05, 0.05, 0.35)
+
+[node name="NightVisionPostProcess" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_nvg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="CockpitOverlay" type="Control" parent="."]
 layout_mode = 1

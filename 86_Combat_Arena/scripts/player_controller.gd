@@ -7,12 +7,16 @@ signal fired_cannon()
 signal died()
 signal camera_mode_changed(is_fps: bool)
 signal telemetry_updated(cannon_pitch_deg: float, turret_yaw_deg: float)
+signal night_vision_toggled(active: bool)
 
 @export var walk_speed: float = 8.0
 @export var run_speed: float = 16.0
 @export var mouse_sensitivity: float = 0.0025
 @export var max_hp: float = 100.0
 @export var cannon_cooldown: float = 1.8
+
+var is_night_vision_active: bool = true
+var is_headlight_active: bool = true
 
 var current_hp: float = 100.0
 var reload_timer: float = 0.0
@@ -41,6 +45,8 @@ var current_turn_direction: float = 0.0
 @onready var fps_camera: Camera3D = get_node_or_null("FPSCamera3D")
 @onready var audio_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
 @onready var footstep_audio_player: AudioStreamPlayer3D = get_node_or_null("FootstepAudioPlayer3D")
+@onready var headlight_l: SpotLight3D = get_node_or_null("TacticalHeadlightL")
+@onready var headlight_r: SpotLight3D = get_node_or_null("TacticalHeadlightR")
 
 @onready var anim_player: AnimationPlayer = get_node_or_null("ModelInstance/AnimationPlayer")
 @onready var skeleton: Skeleton3D = get_node_or_null("ModelInstance/M1A4_Armature/Skeleton3D")
@@ -97,11 +103,29 @@ func _ready() -> void:
 	# Default to First-Person Cockpit view
 	is_fps_mode = true
 	is_free_looking = false
+	# Optimized camera far plane (1200m provides full 800m corner-to-corner visibility without GPU depth-precision waste)
 	if fps_camera:
-		fps_camera.far = 2500.0
+		fps_camera.far = 1200.0
 	if camera:
-		camera.far = 2500.0
+		camera.far = 1200.0
+	if headlight_l:
+		headlight_l.visible = is_headlight_active
+	if headlight_r:
+		headlight_r.visible = is_headlight_active
 	update_camera_and_mesh_visibility()
+
+func toggle_night_vision() -> bool:
+	is_night_vision_active = not is_night_vision_active
+	night_vision_toggled.emit(is_night_vision_active)
+	return is_night_vision_active
+
+func toggle_headlights() -> bool:
+	is_headlight_active = not is_headlight_active
+	if headlight_l:
+		headlight_l.visible = is_headlight_active
+	if headlight_r:
+		headlight_r.visible = is_headlight_active
+	return is_headlight_active
 
 func update_camera_and_mesh_visibility() -> void:
 	var in_fps = is_fps_mode and not is_free_looking
@@ -178,6 +202,16 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_camera") and not event.is_echo() and not is_free_looking:
 		is_fps_mode = not is_fps_mode
 		update_camera_and_mesh_visibility()
+
+	# Keyboard Toggle Night Vision Optics (N)
+	if event is InputEventKey and event.pressed and not event.is_echo() and event.keycode == KEY_N:
+		toggle_night_vision()
+		get_viewport().set_input_as_handled()
+
+	# Keyboard Toggle Tactical Headlights (L)
+	if event is InputEventKey and event.pressed and not event.is_echo() and event.keycode == KEY_L:
+		toggle_headlights()
+		get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
 	if is_dead:

@@ -36,3 +36,10 @@ max_distance = 100.0
 volume_db = -12.0
 unit_size = 5.0
 max_distance = 35.0
+
+[node name="SensorEyeLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -1.1)
+light_color = Color(1, 0.12, 0.12, 1)
+light_energy = 3.5
+omni_range = 9.0
+omni_attenuation = 1.4

@@ -21,6 +21,9 @@ class_name CombatHUD
 @onready var alarm_audio_player: AudioStreamPlayer = get_node_or_null("AlarmAudioPlayer")
 @onready var bottom_right_box: Control = get_node_or_null("BottomRight")
 @onready var bottom_left_box: Control = get_node_or_null("BottomLeft")
+@onready var nvg_post_process: ColorRect = get_node_or_null("NightVisionPostProcess")
+
+var is_nvg_active: bool = true
 
 var player_ref: CharacterBody3D = null
 var enemy_ref: CharacterBody3D = null
@@ -48,6 +51,18 @@ func _ready() -> void:
 		critical_warning_box.visible = false
 	if alarm_audio_player:
 		alarm_audio_player.stream = ProceduralAudio.create_alarm_sound()
+	set_night_vision(true)
+
+func set_night_vision(active: bool) -> void:
+	is_nvg_active = active
+	if nvg_post_process:
+		nvg_post_process.visible = active
+	if cockpit_visor and cockpit_visor.has_method("set_nvg_status"):
+		cockpit_visor.set_nvg_status(active)
+
+func toggle_night_vision() -> bool:
+	set_night_vision(not is_nvg_active)
+	return is_nvg_active
 
 func _set_mouse_filter_recursive(node: Node) -> void:
 	if node is Control:
@@ -67,6 +82,8 @@ func bind_player(player: CharacterBody3D) -> void:
 		player.died.connect(_on_player_died)
 	if player.has_signal("camera_mode_changed") and not player.camera_mode_changed.is_connected(_on_camera_mode_changed):
 		player.camera_mode_changed.connect(_on_camera_mode_changed)
+	if player.has_signal("night_vision_toggled") and not player.night_vision_toggled.is_connected(set_night_vision):
+		player.night_vision_toggled.connect(set_night_vision)
 
 func bind_enemy(enemy: CharacterBody3D) -> void:
 	enemy_ref = enemy

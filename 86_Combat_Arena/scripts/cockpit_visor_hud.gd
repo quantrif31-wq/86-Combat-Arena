@@ -15,6 +15,11 @@ var reload_ratio: float = 1.0
 
 var pulse_timer: float = 0.0
 var radar_sweep_angle: float = 0.0
+var is_nvg_active: bool = true
+
+func set_nvg_status(active: bool) -> void:
+	is_nvg_active = active
+	queue_redraw()
 
 func set_all_enemies(list: Array[CharacterBody3D]) -> void:
 	all_enemies = list
@@ -219,7 +224,7 @@ func _draw() -> void:
 	draw_polyline(PackedVector2Array([Vector2(W, rim_y_side - 1.5), right_rim_end - Vector2(0, 1.5)]), cyan_bright, 1.0)
 	
 	# Stenciled Military Nomenclature on Armor
-	draw_string(font, Vector2(30, H - 10), "SAN MAGNOLIA // M1A4 JUGGERNAUT", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.20, 0.24, 0.30, 0.9))
+	draw_string(font, Vector2(30, H - 10), "SAN MAGNOLIA // M1A4 JUGGERNAUT | [N] NVG [L] LIGHTS", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.20, 0.24, 0.30, 0.9))
 	draw_string(font, Vector2(W - 250, H - 10), "COAXIAL 57mm // APFSDS: LOADED", HORIZONTAL_ALIGNMENT_RIGHT, -1, 10, Color(0.20, 0.24, 0.30, 0.9))
 	
 	# 3D Countersunk Military Hex Bolts
@@ -295,11 +300,12 @@ func _draw() -> void:
 				draw_line(mfd_c, mfd_c + sv_tr * (mfd_r * 0.88), Color(0.2, 0.9, 0.6, 0.5 - tr * 0.1), 1.2)
 				
 	# Juggernaut Weapon Status Indicator LEDs:
-	# Left LED: Green (OPTICS COAXIAL NOMINAL)
+	# Left LED: Green/Cyan (OPTICS COAXIAL NOMINAL / NVG STATUS)
 	var led_l = Vector2(cx - console_r * 0.98, H - console_r * 0.22)
-	draw_circle(led_l, 3.5, Color(0.1, 0.9, 0.4, 0.95))
-	draw_circle(led_l, 6.5, Color(0.1, 0.9, 0.4, 0.3))
-	draw_string(font, led_l + Vector2(-40, 3), "OPTIC", HORIZONTAL_ALIGNMENT_RIGHT, -1, 9, Color(0.1, 0.9, 0.4, 0.9))
+	var led_col = Color(0.2, 1.0, 0.45, 0.95) if is_nvg_active else Color(0.2, 0.65, 0.85, 0.9)
+	draw_circle(led_l, 3.5, led_col)
+	draw_circle(led_l, 6.5, Color(led_col.r, led_col.g, led_col.b, 0.3))
+	draw_string(font, led_l + Vector2(-42, 3), "NVG" if is_nvg_active else "OPTIC", HORIZONTAL_ALIGNMENT_RIGHT, -1, 9, led_col)
 	
 	# Right LED: Red/Cyan (57mm CANNON ARMED)
 	var led_r = Vector2(cx + console_r * 0.98, H - console_r * 0.22)
@@ -354,10 +360,14 @@ func _draw() -> void:
 	var heading_str = "%05.2f" % heading_deg
 	var apex_pos = Vector2(cx, h_c.y - h_r)
 	
-	# Tactical Sector Location Banner
+	# Tactical Sector Location & NVG Mode Banner
+	var nvg_tag = "[OPTIC // NVG GEN-3: ACTIVE]" if is_nvg_active else "[OPTIC // DAYLIGHT FLIR: ACTIVE]"
+	var nvg_col = Color(0.35, 1.0, 0.5, 0.95) if is_nvg_active else Color(0.35, 0.85, 1.0, 0.85)
+	draw_string(font, apex_pos + Vector2(-180.0, -42.0), nvg_tag, HORIZONTAL_ALIGNMENT_CENTER, 360, 10, nvg_col)
+
 	var sector_label = get_sector_name()
-	draw_string(font, apex_pos + Vector2(-150.0, -28.0), sector_label, HORIZONTAL_ALIGNMENT_CENTER, 300, 12, cyan_bright)
-	draw_line(apex_pos + Vector2(-110.0, -18.0), apex_pos + Vector2(110.0, -18.0), cyan_dim, 1.0)
+	draw_string(font, apex_pos + Vector2(-150.0, -26.0), sector_label, HORIZONTAL_ALIGNMENT_CENTER, 300, 12, cyan_bright)
+	draw_line(apex_pos + Vector2(-110.0, -16.0), apex_pos + Vector2(110.0, -16.0), cyan_dim, 1.0)
 	
 	draw_string(font, apex_pos + Vector2(-22.0, -4.0), heading_str, HORIZONTAL_ALIGNMENT_CENTER, -1, 12, cyan_bright)
 	draw_line(apex_pos + Vector2(-28.0, -12.0), apex_pos + Vector2(-28.0, 1.0), cyan, 1.5)
