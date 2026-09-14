@@ -4,17 +4,18 @@
 [ext_resource type="PackedScene" path="res://assets/models/m1a4_juggernaut_player.glb" id="2_mesh"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ply"]
-radius = 1.25
+radius = 0.85
 height = 2.2
 
 [node name="PlayerJuggernaut" type="CharacterBody3D" groups=["player", "damageable"]]
 collision_layer = 1
 collision_mask = 3
+motion_mode = 0
 floor_stop_on_slope = true
 floor_constant_speed = true
 floor_max_angle = 1.0472
-floor_snap_length = 0.6
-safe_margin = 0.08
+floor_snap_length = 0.5
+safe_margin = 0.005
 script = ExtResource("1_ply")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

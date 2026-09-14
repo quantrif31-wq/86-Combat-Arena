@@ -246,17 +246,17 @@ func _optimize_pine_trees_multimesh(target_root: Node3D) -> void:
 	compound_body.name = "PineTrees_CompoundCollider"
 	
 	var cyl_shape = CylinderShape3D.new()
-	cyl_shape.radius = 0.65
-	cyl_shape.height = 24.0
+	cyl_shape.radius = 0.55
+	cyl_shape.height = 4.0
 	
 	for i in range(pine_nodes.size()):
 		var p_node = pine_nodes[i]
 		mm.set_instance_transform(i, p_node.transform)
 		
-		# Collision shape matching tree trunk
+		# Clean unscaled cylinder collider centered at mecha height (y = 2.0m)
 		var col = CollisionShape3D.new()
 		col.shape = cyl_shape
-		col.transform = Transform3D(p_node.transform.basis, p_node.transform.origin + Vector3(0, 12.0, 0))
+		col.transform = Transform3D(Basis(), Vector3(p_node.transform.origin.x, p_node.transform.origin.y + 2.0, p_node.transform.origin.z))
 		compound_body.add_child(col)
 		
 		# Free individual node

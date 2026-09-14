@@ -68,12 +68,13 @@ func _ready() -> void:
 	prev_yaw = rotation.y
 	
 	# Configure robust quadruped terrain navigation to completely eliminate sticking
-	floor_snap_length = 0.6
+	motion_mode = CharacterBody3D.MOTION_MODE_GROUNDED
+	floor_snap_length = 0.5
 	floor_constant_speed = true
 	floor_max_angle = deg_to_rad(60.0)
 	floor_stop_on_slope = true
-	safe_margin = 0.08
-	wall_min_slide_angle = deg_to_rad(15.0)
+	safe_margin = 0.005
+	wall_min_slide_angle = 0.0
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	hp_changed.emit(current_hp, max_hp)
 	reload_progress.emit(1.0)
@@ -246,20 +247,27 @@ func _physics_process(delta: float) -> void:
 	
 	var is_moving = move_dir.length() > 0.05
 	
-	if not is_on_floor():
+	var is_on_ground = is_on_floor()
+	if not is_on_ground:
 		velocity.y -= 24.0 * delta
-	elif is_moving:
-		# Downward traction only while actively walking to hug terrain contours
-		velocity.y = -2.5
 	else:
-		# Stationary / Idle: zero all velocities to prevent slope drift
 		velocity.y = 0.0
-		velocity.x = 0.0
-		velocity.z = 0.0
 
 	if is_moving:
-		velocity.x = move_dir.x * current_speed
-		velocity.z = move_dir.z * current_speed
+		if is_on_ground:
+			var floor_norm = get_floor_normal()
+			# Slope Tangent Projection: Projects move_dir seamlessly along the terrain slope plane
+			# This eliminates triangle edge snagging on concave terrain and hills!
+			var slope_tangent = (move_dir - floor_norm * move_dir.dot(floor_norm)).normalized()
+			velocity = slope_tangent * current_speed
+		else:
+			velocity.x = move_dir.x * current_speed
+			velocity.z = move_dir.z * current_speed
+	else:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		if is_on_ground:
+			velocity.y = 0.0
 
 	move_and_slide()
 	
