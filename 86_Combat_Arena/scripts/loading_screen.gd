@@ -30,6 +30,11 @@ var quote_timer: float = 0.0
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
+
+func _exit_tree() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
 	
 	# Start threaded loading of the main arena
 	var err = ResourceLoader.load_threaded_request(TARGET_SCENE_PATH)

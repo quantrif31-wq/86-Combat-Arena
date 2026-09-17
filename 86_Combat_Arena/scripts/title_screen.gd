@@ -130,7 +130,13 @@ func _on_audio_toggle_pressed() -> void:
 
 func _on_exit_pressed() -> void:
 	_play_click()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
 	get_tree().quit()
+
+func _exit_tree() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):

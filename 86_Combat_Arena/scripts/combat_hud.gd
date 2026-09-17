@@ -249,12 +249,25 @@ func toggle_pause() -> void:
 	var is_paused = not get_tree().paused
 	get_tree().paused = is_paused
 	pause_overlay.visible = is_paused
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if is_paused else Input.MOUSE_MODE_CAPTURED
+	if is_paused:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_CAPTURED)
 
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_CAPTURED)
 	get_tree().reload_current_scene()
 
 func _on_return_to_base_pressed() -> void:
 	get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
 	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")
+
+func _exit_tree() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)

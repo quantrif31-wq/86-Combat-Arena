@@ -143,22 +143,35 @@ func update_camera_and_mesh_visibility() -> void:
 	camera_mode_changed.emit(in_fps)
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
-		if not is_dead and not get_tree().paused:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	match what:
+		NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_WINDOW_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
+		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_WM_WINDOW_FOCUS_IN:
+			# Do NOT auto-capture on focus in; wait for explicit player click
+			pass
+
+func _exit_tree() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
 
 func _input(event: InputEvent) -> void:
 	if is_dead or get_tree().paused:
 		return
 		
-	# Auto-capture mouse on any mouse button click
-	if event is InputEventMouseButton and event.pressed:
-		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
 	# Release mouse on Escape
 	if event.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
+		return
+
+	# If mouse is NOT captured, require explicit left click to capture control
+	# NEVER capture mouse on mere mouse movement!
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_CAPTURED)
+			get_viewport().set_input_as_handled()
 		return
 
 	# Right Mouse Button: Hold RMB to enter 3rd-person Free-Look
@@ -170,10 +183,8 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 		
-	# Mouse look & aim
+	# Mouse look & aim (Only executes when mouse is captured)
 	if event is InputEventMouseMotion:
-		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			
 		if not is_free_looking:
 			# FIRST-PERSON MODE (Default):
