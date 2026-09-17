@@ -144,11 +144,11 @@ func update_camera_and_mesh_visibility() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
-		if not is_dead:
+		if not is_dead and not get_tree().paused:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _input(event: InputEvent) -> void:
-	if is_dead:
+	if is_dead or get_tree().paused:
 		return
 		
 	# Auto-capture mouse on any mouse button click

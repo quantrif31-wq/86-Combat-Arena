@@ -22,6 +22,11 @@ class_name CombatHUD
 @onready var bottom_right_box: Control = get_node_or_null("BottomRight")
 @onready var bottom_left_box: Control = get_node_or_null("BottomLeft")
 @onready var nvg_post_process: ColorRect = get_node_or_null("NightVisionPostProcess")
+@onready var pause_overlay: ColorRect = get_node_or_null("PauseOverlay")
+@onready var btn_resume: Button = get_node_or_null("PauseOverlay/PausePanel/Margin/VBox/BtnResume")
+@onready var btn_restart: Button = get_node_or_null("PauseOverlay/PausePanel/Margin/VBox/BtnRestart")
+@onready var btn_return_base: Button = get_node_or_null("PauseOverlay/PausePanel/Margin/VBox/BtnReturnBase")
+@onready var btn_return_base_banner: Button = get_node_or_null("BannerBox/Margin/VBox/BtnReturnBaseBanner")
 
 var is_nvg_active: bool = true
 
@@ -52,6 +57,22 @@ func _ready() -> void:
 	if alarm_audio_player:
 		alarm_audio_player.stream = ProceduralAudio.create_alarm_sound()
 	set_night_vision(true)
+	
+	# Setup pause menu
+	if pause_overlay:
+		pause_overlay.visible = false
+	if btn_resume:
+		btn_resume.mouse_filter = Control.MOUSE_FILTER_STOP
+		btn_resume.pressed.connect(toggle_pause)
+	if btn_restart:
+		btn_restart.mouse_filter = Control.MOUSE_FILTER_STOP
+		btn_restart.pressed.connect(_on_restart_pressed)
+	if btn_return_base:
+		btn_return_base.mouse_filter = Control.MOUSE_FILTER_STOP
+		btn_return_base.pressed.connect(_on_return_to_base_pressed)
+	if btn_return_base_banner:
+		btn_return_base_banner.mouse_filter = Control.MOUSE_FILTER_STOP
+		btn_return_base_banner.pressed.connect(_on_return_to_base_pressed)
 
 func set_night_vision(active: bool) -> void:
 	is_nvg_active = active
@@ -199,7 +220,10 @@ func _on_player_died() -> void:
 	banner_box.visible = true
 	banner_title.text = "SIGNAL LOST - UNIT DESTROYED"
 	banner_title.modulate = Color(1.0, 0.2, 0.2)
-	banner_subtitle.text = "PILOT KIA IN SECTOR 86\nPress [R] to Re-deploy"
+	banner_subtitle.text = "PILOT KIA IN SECTOR 86\nPress [R] to Re-deploy or Return to Base"
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if btn_return_base_banner:
+		btn_return_base_banner.mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _on_enemy_died() -> void:
 	pass
@@ -208,4 +232,29 @@ func show_victory_banner() -> void:
 	banner_box.visible = true
 	banner_title.text = "MISSION ACCOMPLISHED"
 	banner_title.modulate = Color(0.3, 1.0, 0.6)
-	banner_subtitle.text = "ALL HOSTILE FORCES IN SECTOR 86 NEUTRALIZED\nPress [R] to Re-deploy"
+	banner_subtitle.text = "ALL HOSTILE FORCES IN SECTOR 86 NEUTRALIZED\nPress [R] to Re-deploy or Return to Base"
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if btn_return_base_banner:
+		btn_return_base_banner.mouse_filter = Control.MOUSE_FILTER_STOP
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		if not banner_box.visible:
+			toggle_pause()
+			get_viewport().set_input_as_handled()
+
+func toggle_pause() -> void:
+	if not pause_overlay:
+		return
+	var is_paused = not get_tree().paused
+	get_tree().paused = is_paused
+	pause_overlay.visible = is_paused
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if is_paused else Input.MOUSE_MODE_CAPTURED
+
+func _on_restart_pressed() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+func _on_return_to_base_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")

@@ -1,0 +1,232 @@
+[gd_scene load_steps=10 format=3 uid="uid://c_load_86_01"]
+
+[ext_resource type="Script" path="res://scripts/loading_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/loading_art_pararaid.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/undertaker_emblem.png" id="3_emblem"]
+[ext_resource type="Script" path="res://scripts/pararaid_waveform.gd" id="4_waveform"]
+
+[sub_resource type="SystemFont" id="SystemFont_military"]
+font_names = PackedStringArray("Consolas", "Courier New", "Cascadia Code", "monospace")
+font_weight = 700
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wave_box"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0.03, 0.05, 0.08, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.55, 0.75, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_bg"]
+bg_color = Color(0.06, 0.08, 0.12, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.45, 0.55, 0.6)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_fg"]
+bg_color = Color(0.92, 0.22, 0.28, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.6, 0.65, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+shadow_color = Color(0.9, 0.15, 0.25, 0.45)
+shadow_size = 8
+
+[node name="LoadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.06, 0.42)
+
+[node name="TopHeader" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 50.0
+offset_top = 40.0
+offset_right = 650.0
+offset_bottom = 120.0
+
+[node name="Emblem" type="TextureRect" parent="TopHeader"]
+modulate = Color(0.92, 0.25, 0.3, 0.95)
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
+texture = ExtResource("3_emblem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="TopHeader"]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 4.0
+offset_right = 680.0
+offset_bottom = 64.0
+theme_override_constants/separation = 4
+
+[node name="HeaderTitle" type="Label" parent="TopHeader/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.96, 0.98, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 18
+text = "PARA-RAID NEURAL SYNCHRONIZATION // TACTICAL LINK"
+
+[node name="HeaderSub" type="Label" parent="TopHeader/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.78, 0.92, 0.85)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 11
+text = "REPUBLIC MILITARY DEFENSE CORPS  |  CADRE: SPEARHEAD SQUADRON 01"
+
+[node name="CenterBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -440.0
+offset_top = -120.0
+offset_right = 440.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="WaveformBox" type="PanelContainer" parent="CenterBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_wave_box")
+
+[node name="VBox" type="VBoxContainer" parent="CenterBox/WaveformBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="WaveformTitle" type="Label" parent="CenterBox/WaveformBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.8, 0.95, 0.9)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 12
+text = "[ SENSORY RESONANCE OSCILLOSCOPE // FREQ: 96.48 MHz // CARRIER: NOISELESS ]"
+
+[node name="WaveformCanvas" type="Control" parent="CenterBox/WaveformBox/VBox"]
+custom_minimum_size = Vector2(840, 110)
+layout_mode = 2
+script = ExtResource("4_waveform")
+
+[node name="ProgressInfo" type="HBoxContainer" parent="CenterBox"]
+layout_mode = 2
+
+[node name="StatusTitle" type="Label" parent="CenterBox/ProgressInfo"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.82, 0.9, 0.9)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 12
+text = "NEURAL SYNC & WEAPON SYSTEMS TELEMETRY:"
+
+[node name="PercentLabel" type="Label" parent="CenterBox/ProgressInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.3, 0.35, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 14
+text = "[   0 % ]"
+
+[node name="ProgressBar" type="ProgressBar" parent="CenterBox"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_bar_fg")
+show_percentage = false
+
+[node name="TelemetryLog" type="Label" parent="CenterBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.72, 0.28, 0.95)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 12
+text = "[01/05] PARA-RAID NEURAL RESONANCE: LINKING SENSORY CORRIDOR (96.48 MHz)..."
+
+[node name="BottomBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -500.0
+offset_top = -90.0
+offset_right = 500.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="QuoteLabel" type="Label" parent="BottomBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.38, 0.42, 0.95)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 13
+text = "\"If you ever make it to where we fell... please leave a flower for us.\""
+horizontal_alignment = 1
+
+[node name="FooterNotice" type="Label" parent="BottomBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.55, 0.65, 0.7)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 10
+text = "REPUBLIC OF SAN MAGNOLIA // 86TH WARD EXPEDITIONARY FORCES"
+horizontal_alignment = 1
+
+[node name="FadeCurtain" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.02, 0.03, 1)
+
+[node name="SFXPlayer" type="AudioStreamPlayer" parent="."]

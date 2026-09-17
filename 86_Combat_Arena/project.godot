@@ -8,7 +8,7 @@ config_version=5
 
 config/name="86: Eighty-Six - Combat Arena"
 config/description="M1A4 Juggernaut Tactical Combat Arena in the 86th Sector"
-run/main_scene="res://scenes/main_arena.tscn"
+run/main_scene="res://scenes/title_screen.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [display]

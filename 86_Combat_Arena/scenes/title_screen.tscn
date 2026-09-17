@@ -1,0 +1,472 @@
+[gd_scene load_steps=14 format=3 uid="uid://c_title_86_01"]
+
+[ext_resource type="Script" path="res://scripts/title_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/title_art_86_wide.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/spider_lily_petal.png" id="3_petal"]
+[ext_resource type="Texture2D" path="res://assets/ui/undertaker_emblem.png" id="4_emblem"]
+
+[sub_resource type="Gradient" id="Gradient_overlay"]
+offsets = PackedFloat32Array(0, 0.35, 0.58)
+colors = PackedColorArray(0.02, 0.03, 0.05, 0.68, 0.02, 0.03, 0.05, 0.35, 0.02, 0.03, 0.05, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_overlay"]
+gradient = SubResource("Gradient_overlay")
+width = 1280
+height = 720
+fill_from = Vector2(0, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="SystemFont" id="SystemFont_military"]
+font_names = PackedStringArray("Consolas", "Courier New", "Cascadia Code", "monospace")
+font_weight = 700
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.04, 0.06, 0.09, 0.72)
+border_width_left = 3
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.38, 0.48, 0.5)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+content_margin_left = 22.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.12, 0.04, 0.06, 0.88)
+border_width_left = 5
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.92, 0.22, 0.28, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+shadow_color = Color(0.85, 0.15, 0.2, 0.35)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+content_margin_left = 22.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.82, 0.18, 0.24, 0.95)
+border_width_left = 5
+border_color = Color(1, 0.8, 0.8, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+bg_color = Color(0.03, 0.04, 0.07, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.22, 0.28, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 16
+
+[sub_resource type="Curve" id="Curve_petal_scale"]
+_data = [Vector2(0, 0.2), 0.0, 1.8, 0, 0, Vector2(0.5, 0.85), 0.0, 0.0, 0, 0, Vector2(1, 0.4), -1.2, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Gradient" id="Gradient_petal_color"]
+offsets = PackedFloat32Array(0, 0.15, 0.8, 1)
+colors = PackedColorArray(0.9, 0.2, 0.25, 0, 1, 0.25, 0.3, 0.9, 0.85, 0.18, 0.22, 0.85, 0.6, 0.1, 0.15, 0)
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="LeftGradientOverlay" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_overlay")
+expand_mode = 1
+
+[node name="SpiderLilyPetals" type="CPUParticles2D" parent="."]
+position = Vector2(400, -30)
+amount = 42
+lifetime = 11.0
+preprocess = 5.0
+texture = ExtResource("3_petal")
+emission_shape = 3
+emission_rect_extents = Vector2(600, 20)
+direction = Vector2(0.7, 0.85)
+spread = 28.0
+gravity = Vector2(25, 18)
+initial_velocity_min = 28.0
+initial_velocity_max = 68.0
+angular_velocity_min = -35.0
+angular_velocity_max = 50.0
+scale_amount_min = 0.04
+scale_amount_max = 0.085
+scale_amount_curve = SubResource("Curve_petal_scale")
+color_ramp = SubResource("Gradient_petal_color")
+
+[node name="TopLeftBanner" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 50.0
+offset_top = 35.0
+offset_right = 550.0
+offset_bottom = 175.0
+
+[node name="Emblem" type="TextureRect" parent="TopLeftBanner"]
+modulate = Color(0.92, 0.25, 0.3, 0.95)
+layout_mode = 0
+offset_left = 0.0
+offset_top = 6.0
+offset_right = 96.0
+offset_bottom = 102.0
+texture = ExtResource("4_emblem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeaderBox" type="VBoxContainer" parent="TopLeftBanner"]
+layout_mode = 0
+offset_left = 115.0
+offset_top = 0.0
+offset_right = 550.0
+offset_bottom = 135.0
+theme_override_constants/separation = 1
+
+[node name="TitleNumber" type="Label" parent="TopLeftBanner/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.98, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.85, 0.15, 0.22, 0.5)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 56
+text = "86"
+
+[node name="TitleWord" type="Label" parent="TopLeftBanner/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.28, 0.34, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 18
+text = "E I G H T Y - S I X"
+
+[node name="SubBanner" type="Label" parent="TopLeftBanner/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.82, 0.85)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 11
+text = "// REPUBLIC OF SAN MAGNOLIA // 86TH WARD DEFENSE LINE"
+
+[node name="CadreLabel" type="Label" parent="TopLeftBanner/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.7, 0.25, 0.95)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 11
+text = "PROCESSOR: [UNDERTAKER]  |  SPEARHEAD SQUADRON 01"
+
+[node name="LeftPanel" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 65.0
+offset_top = 215.0
+offset_right = 430.0
+offset_bottom = 600.0
+
+[node name="MenuTitle" type="Label" parent="LeftPanel"]
+layout_mode = 2
+offset_top = -24.0
+offset_right = 365.0
+offset_bottom = -6.0
+theme_override_colors/font_color = Color(0.55, 0.65, 0.78, 0.7)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 11
+text = "--- TACTICAL OPERATIONS COMMAND ---"
+
+[node name="VBox" type="VBoxContainer" parent="LeftPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="BtnSortie" type="Button" parent="LeftPanel/VBox"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.9, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "[ 01 // SORTIE DEPLOYMENT ]"
+alignment = 0
+
+[node name="BtnBriefing" type="Button" parent="LeftPanel/VBox"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.85, 0.88, 0.92, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.9, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "[ 02 // TACTICAL BRIEFING ]"
+alignment = 0
+
+[node name="BtnArchive" type="Button" parent="LeftPanel/VBox"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.85, 0.88, 0.92, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.9, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "[ 03 // SQUADRON ARCHIVE ]"
+alignment = 0
+
+[node name="BtnAudio" type="Button" parent="LeftPanel/VBox"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.85, 0.88, 0.92, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.9, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "[ 04 // AUDIO: ACTIVE ]"
+alignment = 0
+
+[node name="BtnExit" type="Button" parent="LeftPanel/VBox"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.75, 0.78, 0.82, 1)
+theme_override_colors/font_hover_color = Color(1, 0.35, 0.35, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "[ 05 // ABORT MISSION ]"
+alignment = 0
+
+[node name="BottomStatus" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 65.0
+offset_top = -80.0
+offset_right = 750.0
+offset_bottom = -25.0
+grow_vertical = 0
+theme_override_constants/separation = 4
+
+[node name="Coords" type="Label" parent="BottomStatus"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.65, 0.75, 0.75)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 11
+text = "LOC: 36°42'N 138°12'E // M1A4 JUGGERNAUT AVIONICS ONLINE // COMBAT SIMULATOR 4.7.2"
+
+[node name="Quote" type="Label" parent="BottomStatus"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.35, 0.4, 0.95)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 12
+text = "\"If you reach the final destination before me... please leave a flower behind.\""
+
+[node name="ModalOverlay" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.02, 0.04, 0.85)
+
+[node name="ModalBriefing" type="PanelContainer" parent="ModalOverlay"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -240.0
+offset_right = 380.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="VBox" type="VBoxContainer" parent="ModalOverlay/ModalBriefing"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="ModalOverlay/ModalBriefing/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.28, 0.34, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 18
+text = "[ TACTICAL BRIEFING // M1A4 JUGGERNAUT COMBAT MANUAL ]"
+
+[node name="Separator" type="ColorRect" parent="ModalOverlay/ModalBriefing/VBox"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.85, 0.22, 0.28, 0.5)
+
+[node name="Content" type="RichTextLabel" parent="ModalOverlay/ModalBriefing/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.85, 0.88, 0.92, 1)
+theme_override_fonts/normal_font = SubResource("SystemFont_military")
+theme_override_font_sizes/normal_font_size = 13
+bbcode_enabled = true
+text = "[color=#5bc0be]-- MOVEMENT & PROPULSION --[/color]
+* [color=#ffd166]W / A / S / D[/color] : Maneuver quadruped spider legs (Forward, Turn Left, Reverse, Turn Right)
+* [color=#ffd166]SHIFT (Hold)[/color] : High-speed gallop propulsion sprint
+
+[color=#5bc0be]-- WEAPONS & TARGETING SYSTEMS --[/color]
+* [color=#ffd166]MOUSE[/color] : Aim turret rotation and elevate 57mm cannon barrel
+* [color=#ffd166]LEFT MOUSE / SPACE[/color] : Fire 57mm Smoothbore Cannon (APFSDS Armor-Piercing)
+* [color=#ffd166]RIGHT MOUSE (Hold)[/color] : Cockpit Visor High-Magnification ADS Targeting Zoom
+* [color=#ffd166]V[/color] : Toggle Tactical Cockpit Visor View / 3rd Person Chassis Chase Cam
+* [color=#ffd166]N[/color] : Toggle High-Gain Tactical Night Vision (NVG Phosphor Filter)
+* [color=#ffd166]R[/color] : Fast Field Re-arm & Sector Reset
+* [color=#ffd166]ESC[/color] : Mission Tactical Pause / Return to Base Menu"
+
+[node name="BtnCloseBriefing" type="Button" parent="ModalOverlay/ModalBriefing/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "  [ CONFIRM & RETURN ]  "
+
+[node name="ModalArchive" type="PanelContainer" parent="ModalOverlay"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -250.0
+offset_right = 400.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="VBox" type="VBoxContainer" parent="ModalOverlay/ModalArchive"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="ModalOverlay/ModalArchive/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.28, 0.34, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 18
+text = "[ SQUADRON DOSSIER // SPEARHEAD SQUADRON 01 ]"
+
+[node name="Separator" type="ColorRect" parent="ModalOverlay/ModalArchive/VBox"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.85, 0.22, 0.28, 0.5)
+
+[node name="Content" type="RichTextLabel" parent="ModalOverlay/ModalArchive/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.85, 0.88, 0.92, 1)
+theme_override_fonts/normal_font = SubResource("SystemFont_military")
+theme_override_font_sizes/normal_font_size = 13
+bbcode_enabled = true
+text = "[color=#e63946]-- THE REPUBLIC'S EIGHTY-SIX --[/color]
+Officially, the Republic of San Magnolia has no human casualties in its war against the Legion. The frontline fighting is handled entirely by 'unmanned drones'—the M1A4 Juggernaut. In truth, inside each tin coffin sits an 'Eighty-Six', humans stripped of their citizenship and treated as subhuman processors.
+
+[color=#e63946]-- PROCESSOR: SHINEI NOUZEN (UNDERTAKER) --[/color]
+Captain of the First Ward's First Combat Unit, the Spearhead Squadron. Possesses the eerie sensory ability to hear the lingering voices of the dead and track Legion swarms through sensory resonance. His personal mark is the [b]Headless Reaper carrying a shovel[/b], pledged to carry the memory of every fallen comrade until the very end.
+
+[color=#e63946]-- THE PARA-RAID (SENSORY RESONANCE) --[/color]
+A neural synchronization interface invented by the Republic to link the senses of Handlers and Processors without radio interception. Through high-frequency brainwave resonance, thoughts, telemetry, and voices cross the 85 wards into the endless field of spider lilies."
+
+[node name="BtnCloseArchive" type="Button" parent="ModalOverlay/ModalArchive/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1)
+theme_override_fonts/font = SubResource("SystemFont_military")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "  [ CLOSE ARCHIVE ]  "
+
+[node name="FadeCurtain" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.02, 0.03, 1)
+
+[node name="BGMPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="SFXPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="SFXHoverPlayer" type="AudioStreamPlayer" parent="."]
+volume_db = -10.0
