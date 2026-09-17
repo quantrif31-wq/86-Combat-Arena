@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://c_dest_ammo_01"]
+
+[ext_resource type="Script" path="res://scripts/destructible_ammo_box.gd" id="1_script"]
+
+[node name="DestructibleAmmoBox" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+volume_db = 4.0
+max_distance = 180.0

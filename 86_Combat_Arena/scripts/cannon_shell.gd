@@ -39,10 +39,13 @@ func _physics_process(delta: float) -> void:
 		var hit = space.intersect_ray(query)
 		if hit:
 			var col = hit.collider
-			var is_dmg = col != null and col.has_method("take_damage")
+			var is_dmg = col != null and (col.has_method("take_damage") or col.has_method("take_hit"))
 			detonate(hit.position, is_dmg)
-			if is_dmg:
-				col.take_damage(damage, shooter_node)
+			if col != null:
+				if col.has_method("take_hit"):
+					col.take_hit(damage, shooter_node, hit.position, forward)
+				elif col.has_method("take_damage"):
+					col.take_damage(damage, shooter_node)
 			return
 			
 	global_position = next_pos
@@ -55,19 +58,26 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	if body == shooter_node:
 		return
-	var is_damageable = body.has_method("take_damage")
+	var forward = -transform.basis.z
+	var is_damageable = body.has_method("take_damage") or body.has_method("take_hit")
 	detonate(global_position, is_damageable)
-	if is_damageable:
+	if body.has_method("take_hit"):
+		body.take_hit(damage, shooter_node, global_position, forward)
+	elif body.has_method("take_damage"):
 		body.take_damage(damage, shooter_node)
 
 func _on_area_entered(area: Area3D) -> void:
 	if area == shooter_node or area.get_parent() == shooter_node:
 		return
-	var target = area if area.has_method("take_damage") else area.get_parent()
-	var is_damageable = target != null and target.has_method("take_damage")
+	var forward = -transform.basis.z
+	var target = area if (area.has_method("take_damage") or area.has_method("take_hit")) else area.get_parent()
+	var is_damageable = target != null and (target.has_method("take_damage") or target.has_method("take_hit"))
 	detonate(global_position, is_damageable)
-	if is_damageable:
-		target.take_damage(damage, shooter_node)
+	if target != null:
+		if target.has_method("take_hit"):
+			target.take_hit(damage, shooter_node, global_position, forward)
+		elif target.has_method("take_damage"):
+			target.take_damage(damage, shooter_node)
 
 func detonate(pos: Vector3, is_unit: bool = true) -> void:
 	var vfx_scene = explosion_scene if is_unit else wall_hit_scene

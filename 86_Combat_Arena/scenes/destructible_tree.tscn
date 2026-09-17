@@ -1,0 +1,67 @@
+[gd_scene load_steps=5 format=3 uid="uid://c_dest_tree_01"]
+
+[ext_resource type="Script" path="res://scripts/destructible_tree.gd" id="1_script"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cap"]
+albedo_color = Color(0.42, 0.28, 0.16, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_splinter"]
+albedo_color = Color(0.48, 0.32, 0.18, 1)
+roughness = 0.88
+
+[sub_resource type="BoxMesh" id="BoxMesh_splinter"]
+material = SubResource("StandardMaterial3D_splinter")
+size = Vector3(0.12, 0.45, 0.08)
+
+[node name="DestructibleTree" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="StumpBody" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="StumpMesh" type="MeshInstance3D" parent="StumpBody"]
+
+[node name="StumpCollision" type="CollisionShape3D" parent="StumpBody"]
+
+[node name="StumpCap" type="MeshInstance3D" parent="StumpBody"]
+material_override = SubResource("StandardMaterial3D_cap")
+
+[node name="FallingBody" type="RigidBody3D" parent="."]
+collision_layer = 4
+collision_mask = 1
+mass = 320.0
+gravity_scale = 1.6
+
+[node name="FallingMesh" type="MeshInstance3D" parent="FallingBody"]
+
+[node name="FallingCollision" type="CollisionShape3D" parent="FallingBody"]
+
+[node name="FallingCap" type="MeshInstance3D" parent="FallingBody"]
+material_override = SubResource("StandardMaterial3D_cap")
+
+[node name="FallingAudio" type="AudioStreamPlayer3D" parent="FallingBody"]
+volume_db = 2.0
+max_distance = 160.0
+
+[node name="SnapAudio" type="AudioStreamPlayer3D" parent="."]
+volume_db = 4.0
+max_distance = 200.0
+
+[node name="SplinterParticles" type="CPUParticles3D" parent="."]
+emitting = false
+amount = 24
+lifetime = 1.8
+one_shot = true
+explosiveness = 0.95
+mesh = SubResource("BoxMesh_splinter")
+emission_shape = 1
+emission_sphere_radius = 0.6
+direction = Vector3(0, 1, 0)
+spread = 75.0
+gravity = Vector3(0, -12, 0)
+initial_velocity_min = 8.0
+initial_velocity_max = 16.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
