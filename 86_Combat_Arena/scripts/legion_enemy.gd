@@ -27,18 +27,18 @@ var strafe_dir: float = 1.0
 var target_node: Node3D = null # Player, Ally, or BaseCore
 var base_target_pos: Vector3 = Vector3(0, 0, 45) # Forward base location
 
-# Kinematics & Bones
 var current_cannon_pitch: float = 0.0
 var current_turret_yaw: float = 0.0
 var recoil_pitch: float = 0.0
 var recoil_buffer: float = 0.0
 var prev_yaw: float = 0.0
+var walk_phase: float = 0.0
 
 @onready var model_instance: Node3D = $ModelInstance
 @onready var muzzle: Marker3D = $Muzzle
 @onready var audio_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
-@onready var anim_player: AnimationPlayer = get_node_or_null("ModelInstance/AnimationPlayer")
-@onready var skeleton: Skeleton3D = get_node_or_null("ModelInstance/M1A4_Armature/Skeleton3D")
+@onready var anim_player: AnimationPlayer = null
+@onready var skeleton: Skeleton3D = null
 @onready var eye_light: OmniLight3D = get_node_or_null("SensorEyeLight")
 
 var turret_bone_idx: int = -1
@@ -47,6 +47,10 @@ var recoil_bone_idx: int = -1
 var turret_rest_q: Quaternion = Quaternion.IDENTITY
 var cannon_rest_q: Quaternion = Quaternion.IDENTITY
 var recoil_rest_pos: Vector3 = Vector3.ZERO
+
+const MODEL_AMEISE = preload("res://assets/models/legion_ameise.glb")
+const MODEL_GRAUWOLF = preload("res://assets/models/legion_grauwolf.glb")
+const MODEL_SHEPHERD = preload("res://assets/models/legion_shepherd_dinosauria.glb")
 
 const CANNON_SHELL_SCENE = preload("res://scenes/cannon_shell.tscn")
 const MUZZLE_FLASH_SCENE = preload("res://scenes/muzzle_flash_vfx.tscn")
@@ -98,9 +102,33 @@ func _ready() -> void:
 	current_hp = max_hp
 	hp_changed.emit(current_hp, max_hp)
 	
-	if audio_player:
-		audio_player.stream = ProceduralAudio.create_cannon_sound()
+	# Dynamic model instance replacement with authentic Legion GLBs
+	if model_instance:
+		model_instance.queue_free()
 		
+	var target_model_res: PackedScene = MODEL_GRAUWOLF
+	match unit_type:
+		UnitType.AMEISE:
+			target_model_res = MODEL_AMEISE
+			if muzzle:
+				muzzle.position = Vector3(0, 1.25, -1.8)
+		UnitType.GRAUWOLF:
+			target_model_res = MODEL_GRAUWOLF
+			if muzzle:
+				muzzle.position = Vector3(0, 1.45, -2.1)
+		UnitType.SHEPHERD:
+			target_model_res = MODEL_SHEPHERD
+			if muzzle:
+				muzzle.position = Vector3(0, 2.35, -4.6)
+				
+	var new_model = target_model_res.instantiate()
+	new_model.name = "ModelInstance"
+	add_child(new_model)
+	model_instance = new_model
+	
+	skeleton = model_instance.find_child("Skeleton3D", true, false)
+	anim_player = model_instance.find_child("AnimationPlayer", true, false)
+	
 	if skeleton:
 		turret_bone_idx = skeleton.find_bone("Turret")
 		cannon_bone_idx = skeleton.find_bone("Cannon")
@@ -328,17 +356,45 @@ func _update_turret_aim(delta: float) -> void:
 			skeleton.set_bone_pose_position(recoil_bone_idx, recoil_rest_pos)
 
 func _update_animations(delta: float) -> void:
-	if not anim_player or current_state == State.DEAD:
+	if current_state == State.DEAD:
 		return
 	var h_speed = Vector2(velocity.x, velocity.z).length()
-	if h_speed > 0.3:
-		if anim_player.current_animation != "Run":
-			anim_player.play("Run", 0.2)
-		anim_player.speed_scale = clampf(h_speed / combat_speed, 0.6, 1.7)
-	else:
-		if anim_player.current_animation != "Idle":
-			anim_player.play("Idle", 0.25)
-		anim_player.speed_scale = 1.0
+	
+	# Procedural spider leg stepping kinematics
+	if skeleton and h_speed > 0.3:
+		walk_phase += delta * (combat_speed * 2.4)
+		var leg_angle_1 = sin(walk_phase) * deg_to_rad(20.0)
+		var leg_angle_2 = -sin(walk_phase) * deg_to_rad(20.0)
+		
+		# Group 1 legs
+		for b_name in ["Leg_FL", "Leg_RR", "Leg_L1", "Leg_R2", "Leg_L3", "Leg_R4"]:
+			var b = skeleton.find_bone(b_name)
+			if b >= 0:
+				var rest_q = skeleton.get_bone_rest(b).basis.get_rotation_quaternion()
+				skeleton.set_bone_pose_rotation(b, rest_q * Quaternion(Vector3.RIGHT, leg_angle_1))
+		# Group 2 legs
+		for b_name in ["Leg_FR", "Leg_RL", "Leg_R1", "Leg_L2", "Leg_R3", "Leg_L4"]:
+			var b = skeleton.find_bone(b_name)
+			if b >= 0:
+				var rest_q = skeleton.get_bone_rest(b).basis.get_rotation_quaternion()
+				skeleton.set_bone_pose_rotation(b, rest_q * Quaternion(Vector3.RIGHT, leg_angle_2))
+	
+	# Animate Shepherd Neural Core pulsing
+	if skeleton and unit_type == UnitType.SHEPHERD:
+		var core_idx = skeleton.find_bone("Neural_Core")
+		if core_idx >= 0:
+			var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.006) * 0.12
+			skeleton.set_bone_pose_scale(core_idx, Vector3(pulse, pulse, pulse))
+			
+	if anim_player:
+		if h_speed > 0.3:
+			if anim_player.current_animation != "Run":
+				anim_player.play("Run", 0.2)
+			anim_player.speed_scale = clampf(h_speed / combat_speed, 0.6, 1.7)
+		else:
+			if anim_player.current_animation != "Idle":
+				anim_player.play("Idle", 0.25)
+			anim_player.speed_scale = 1.0
 
 func take_damage(amount: float, attacker: Node = null) -> void:
 	if is_dead:

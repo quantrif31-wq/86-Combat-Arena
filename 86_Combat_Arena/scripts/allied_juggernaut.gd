@@ -43,6 +43,10 @@ var turret_rest_q: Quaternion = Quaternion.IDENTITY
 var cannon_rest_q: Quaternion = Quaternion.IDENTITY
 var recoil_rest_pos: Vector3 = Vector3.ZERO
 
+const MODEL_UNDERTAKER = preload("res://assets/models/m1a4_undertaker.glb")
+const MODEL_WEHRWOLF = preload("res://assets/models/m1a4_wehrwolf.glb")
+const MODEL_GUNSLINGER = preload("res://assets/models/m1a4_gunslinger.glb")
+
 const CANNON_SHELL_SCENE = preload("res://scenes/cannon_shell.tscn")
 const MUZZLE_FLASH_SCENE = preload("res://scenes/muzzle_flash_vfx.tscn")
 const EXPLOSION_VFX = preload("res://scenes/explosion_vfx.tscn")
@@ -54,6 +58,33 @@ func _ready() -> void:
 	add_to_group("allies")
 	add_to_group("damageable")
 	add_to_group("allied_target")
+	
+	# Dynamically instantiate custom squad model based on callsign
+	var model_res: PackedScene = MODEL_WEHRWOLF
+	match callsign.to_upper():
+		"UNDERTAKER":
+			model_res = MODEL_UNDERTAKER
+			if muzzle:
+				muzzle.position = Vector3(0, 1.84, -2.6)
+		"WEHRWOLF":
+			model_res = MODEL_WEHRWOLF
+			if muzzle:
+				muzzle.position = Vector3(0, 1.84, -2.6)
+		"GUNSLINGER":
+			model_res = MODEL_GUNSLINGER
+			if muzzle:
+				muzzle.position = Vector3(0, 1.84, -3.3)
+				
+	if model_instance:
+		model_instance.queue_free()
+		
+	var new_model = model_res.instantiate()
+	new_model.name = "ModelInstance"
+	add_child(new_model)
+	model_instance = new_model
+	
+	skeleton = model_instance.find_child("Skeleton3D", true, false)
+	anim_player = model_instance.find_child("AnimationPlayer", true, false)
 	
 	current_hp = max_hp
 	hp_changed.emit(callsign, current_hp, max_hp)

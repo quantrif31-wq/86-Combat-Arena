@@ -22,6 +22,7 @@ const SFX_SYNC = preload("res://assets/audio/pararaid_sync.wav")
 @onready var modal_overlay: ColorRect = $ModalOverlay
 @onready var modal_briefing: PanelContainer = $ModalOverlay/ModalBriefing
 @onready var modal_archive: PanelContainer = $ModalOverlay/ModalArchive
+@onready var modal_pilot_selection: Control = get_node_or_null("ModalOverlay/PilotSelectionModal")
 @onready var btn_close_briefing: Button = $ModalOverlay/ModalBriefing/VBox/BtnCloseBriefing
 @onready var btn_close_archive: Button = $ModalOverlay/ModalArchive/VBox/BtnCloseArchive
 
@@ -29,6 +30,7 @@ const SFX_SYNC = preload("res://assets/audio/pararaid_sync.wav")
 
 var is_transitioning: bool = false
 var audio_muted: bool = false
+var pending_sortie_target: String = "res://scenes/chapter_1_mission.tscn"
 
 func _ready() -> void:
 	# Ensure mouse mode is visible
@@ -44,6 +46,10 @@ func _ready() -> void:
 	modal_overlay.visible = false
 	modal_briefing.visible = false
 	modal_archive.visible = false
+	if modal_pilot_selection:
+		modal_pilot_selection.visible = false
+		modal_pilot_selection.sortie_confirmed.connect(_on_pilot_sortie_confirmed)
+		modal_pilot_selection.modal_closed.connect(_on_close_modal_pressed)
 	
 	# Fade in from black
 	fade_curtain.visible = true
@@ -81,13 +87,27 @@ func _play_click() -> void:
 		sfx_player.play()
 
 func _on_chapter_pressed() -> void:
-	if GameAppManager:
-		GameAppManager.target_scene_path = "res://scenes/chapter_1_mission.tscn"
-	_start_transition_to_loading()
+	pending_sortie_target = "res://scenes/chapter_1_mission.tscn"
+	_open_pilot_selection()
 
 func _on_sortie_pressed() -> void:
+	pending_sortie_target = "res://scenes/main_arena.tscn"
+	_open_pilot_selection()
+
+func _open_pilot_selection() -> void:
+	if is_transitioning:
+		return
+	_play_click()
+	modal_overlay.visible = true
+	modal_briefing.visible = false
+	modal_archive.visible = false
+	if modal_pilot_selection:
+		modal_pilot_selection.visible = true
+
+func _on_pilot_sortie_confirmed(pilot_id: String) -> void:
 	if GameAppManager:
-		GameAppManager.target_scene_path = "res://scenes/main_arena.tscn"
+		GameAppManager.selected_pilot = pilot_id
+		GameAppManager.target_scene_path = pending_sortie_target
 	_start_transition_to_loading()
 
 func _start_transition_to_loading() -> void:
@@ -117,6 +137,8 @@ func _on_briefing_pressed() -> void:
 	modal_overlay.visible = true
 	modal_briefing.visible = true
 	modal_archive.visible = false
+	if modal_pilot_selection:
+		modal_pilot_selection.visible = false
 
 func _on_archive_pressed() -> void:
 	if is_transitioning:
@@ -125,12 +147,16 @@ func _on_archive_pressed() -> void:
 	modal_overlay.visible = true
 	modal_briefing.visible = false
 	modal_archive.visible = true
+	if modal_pilot_selection:
+		modal_pilot_selection.visible = false
 
 func _on_close_modal_pressed() -> void:
 	_play_click()
 	modal_overlay.visible = false
 	modal_briefing.visible = false
 	modal_archive.visible = false
+	if modal_pilot_selection:
+		modal_pilot_selection.visible = false
 
 func _on_audio_toggle_pressed() -> void:
 	_play_click()

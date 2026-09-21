@@ -18,6 +18,15 @@ signal night_vision_toggled(active: bool)
 var is_night_vision_active: bool = true
 var is_headlight_active: bool = true
 
+var current_pilot_id: String = "undertaker"
+var pilot_cannon_damage: float = 60.0
+var sniper_zoom_stage: int = 0
+var secondary_fire_active: bool = false
+var autocannon_timer: float = 0.0
+var blade_cooldown_timer: float = 0.0
+var whisper_detect_timer: float = 0.0
+var is_autocannon_side_left: bool = false
+
 var current_hp: float = 100.0
 var reload_timer: float = 0.0
 var is_aiming: bool = false
@@ -64,7 +73,33 @@ var default_cam_fov: float = 80.0
 var ads_cam_fov: float = 35.0
 
 func _ready() -> void:
+	# Load selected pilot configuration
+	var gam = get_node_or_null("/root/GameAppManager")
+	var pilot_cfg = gam.get_current_pilot_config() if gam else {}
+	current_pilot_id = pilot_cfg.get("id", "undertaker")
+	max_hp = pilot_cfg.get("max_hp", 110.0)
 	current_hp = max_hp
+	walk_speed = pilot_cfg.get("speed", 8.8)
+	run_speed = walk_speed * 1.85
+	cannon_cooldown = pilot_cfg.get("fire_cooldown", 1.9)
+	pilot_cannon_damage = pilot_cfg.get("cannon_damage", 60.0)
+	
+	var model_path = pilot_cfg.get("model_path", "res://assets/models/m1a4_undertaker.glb")
+	if ResourceLoader.exists(model_path):
+		var target_scene = load(model_path)
+		if target_scene:
+			if model_instance:
+				model_instance.queue_free()
+			var new_inst = target_scene.instantiate()
+			new_inst.name = "ModelInstance"
+			add_child(new_inst)
+			model_instance = new_inst
+			
+	if current_pilot_id == "gunslinger" and muzzle:
+		muzzle.position = Vector3(0, 1.8427, -3.3)
+	elif muzzle:
+		muzzle.position = Vector3(0, 1.8427, -2.6)
+		
 	prev_yaw = rotation.y
 	
 	# Configure robust quadruped terrain navigation to completely eliminate sticking
@@ -81,8 +116,8 @@ func _ready() -> void:
 	
 	# Bind Rigged Model Nodes
 	if model_instance:
-		anim_player = model_instance.get_node_or_null("AnimationPlayer")
-		skeleton = model_instance.get_node_or_null("M1A4_Armature/Skeleton3D")
+		anim_player = model_instance.find_child("AnimationPlayer", true, false)
+		skeleton = model_instance.find_child("Skeleton3D", true, false)
 		
 	if skeleton:
 		turret_bone_idx = skeleton.find_bone("Turret")
@@ -174,14 +209,31 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 
-	# Right Mouse Button: Hold RMB to enter 3rd-person Free-Look
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
-		is_free_looking = event.pressed
-		if spring_arm:
-			spring_arm.rotation.y = 0.0
-		update_camera_and_mesh_visibility()
+	# Pilot Special Input: Key F or Middle Mouse Button or Right Click context
+	if event is InputEventKey and event.pressed and not event.is_echo() and event.keycode == KEY_F:
+		_handle_pilot_ability_input(true)
 		get_viewport().set_input_as_handled()
 		return
+	elif event is InputEventKey and not event.pressed and event.keycode == KEY_F:
+		_handle_pilot_ability_input(false)
+		get_viewport().set_input_as_handled()
+		return
+
+	# Right Mouse Button
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		if is_fps_mode:
+			# In FPS mode, RMB directly activates pilot's signature combat ability!
+			_handle_pilot_ability_input(event.pressed)
+			get_viewport().set_input_as_handled()
+			return
+		else:
+			# In 3rd person mode, RMB is free-look
+			is_free_looking = event.pressed
+			if spring_arm:
+				spring_arm.rotation.y = 0.0
+			update_camera_and_mesh_visibility()
+			get_viewport().set_input_as_handled()
+			return
 		
 	# Mouse look & aim (Only executes when mouse is captured)
 	if event is InputEventMouseMotion:
@@ -241,11 +293,19 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("fire_cannon") and reload_timer <= 0.0:
 		shoot_cannon()
 		
-	# Smooth Camera ADS Zoom
+	# Process pilot unique active traits (Autocannons, Blades, Whispers)
+	_process_pilot_abilities(delta)
+		
+	# Smooth Camera ADS Zoom / Pilot Optic Zoom
 	var active_cam = fps_camera if (is_fps_mode and fps_camera) else camera
 	if active_cam:
-		var target_fov = ads_cam_fov if is_aiming else default_cam_fov
-		active_cam.fov = lerpf(active_cam.fov, target_fov, 12.0 * delta)
+		var target_fov = default_cam_fov
+		if current_pilot_id == "gunslinger":
+			var fov_stages = [80.0, 28.0, 14.0, 6.8]
+			target_fov = fov_stages[clampi(sniper_zoom_stage, 0, 3)]
+		elif is_aiming:
+			target_fov = ads_cam_fov
+		active_cam.fov = lerpf(active_cam.fov, target_fov, 14.0 * delta)
 		
 	# Movement input (WASD)
 	var forward_in = Input.get_axis("move_backward", "move_forward")
@@ -477,8 +537,117 @@ func shoot_cannon() -> void:
 			
 		shell.shooter_node = self
 		shell.global_transform = muzzle.global_transform
+		shell.damage = pilot_cannon_damage
+		if current_pilot_id == "gunslinger":
+			shell.speed = 260.0
+			shell.max_lifetime = 5.0
+		elif current_pilot_id == "wehrwolf":
+			shell.speed = 135.0
+		else:
+			shell.speed = 150.0
 		
 	fired_cannon.emit()
+
+func _handle_pilot_ability_input(pressed: bool) -> void:
+	match current_pilot_id:
+		"gunslinger":
+			if pressed:
+				_cycle_sniper_zoom()
+		"wehrwolf":
+			secondary_fire_active = pressed
+		"undertaker":
+			if pressed:
+				_trigger_high_frequency_blades()
+
+func _cycle_sniper_zoom() -> void:
+	sniper_zoom_stage = (sniper_zoom_stage + 1) % 4
+	if audio_player:
+		audio_player.pitch_scale = 1.2 + sniper_zoom_stage * 0.25
+		audio_player.stream = ProceduralAudio.create_footstep_sound()
+		audio_player.play()
+
+func _process_pilot_abilities(delta: float) -> void:
+	if is_dead:
+		return
+		
+	# Raiden: Dual Autocannons
+	if current_pilot_id == "wehrwolf" and secondary_fire_active:
+		autocannon_timer -= delta
+		if autocannon_timer <= 0.0:
+			autocannon_timer = 0.11
+			_fire_autocannon()
+			
+	# Shin: Melee Blade Cooldown & Whispers
+	if current_pilot_id == "undertaker":
+		if blade_cooldown_timer > 0.0:
+			blade_cooldown_timer -= delta
+			
+		whisper_detect_timer -= delta
+		if whisper_detect_timer <= 0.0:
+			whisper_detect_timer = 4.0
+			_check_legion_voices()
+
+func _fire_autocannon() -> void:
+	# Alternate left and right cheek mounts
+	var cheek_offset = Vector3(-0.9 if is_autocannon_side_left else 0.9, 1.6, -1.2)
+	is_autocannon_side_left = not is_autocannon_side_left
+	var fire_origin = global_position + (global_transform.basis * cheek_offset)
+	var target_pos = get_aim_target() + Vector3(randf_range(-0.4, 0.4), randf_range(-0.4, 0.4), 0)
+	var fire_dir = (target_pos - fire_origin).normalized()
+	
+	# Audio
+	if audio_player:
+		audio_player.pitch_scale = randf_range(1.6, 1.85)
+		audio_player.stream = ProceduralAudio.create_footstep_sound()
+		audio_player.play()
+		
+	# Raycast hit check
+	var space = get_world_3d().direct_space_state
+	if space:
+		var q = PhysicsRayQueryParameters3D.create(fire_origin, fire_origin + fire_dir * 160.0, 1 | 2)
+		q.exclude = [self]
+		var hit = space.intersect_ray(q)
+		if hit:
+			var col = hit.collider
+			if col != null:
+				if col.has_method("take_hit"):
+					col.take_hit(hit.position, fire_dir)
+				elif col.has_method("take_damage"):
+					col.take_damage(14.0, self)
+
+func _trigger_high_frequency_blades() -> void:
+	if blade_cooldown_timer > 0.0:
+		return
+	blade_cooldown_timer = 1.8
+	
+	if audio_player:
+		audio_player.pitch_scale = 2.2
+		audio_player.stream = ProceduralAudio.create_hit_sound()
+		audio_player.play()
+		
+	# Melee slice hit check against nearby enemies
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if not is_instance_valid(enemy) or enemy.get("is_dead"):
+			continue
+		var to_tgt = enemy.global_position - global_position
+		if to_tgt.length() < 7.5:
+			var fwd = -global_transform.basis.z
+			if fwd.dot(to_tgt.normalized()) > 0.2:
+				if enemy.has_method("take_hit"):
+					enemy.take_hit(enemy.global_position, fwd)
+				elif enemy.has_method("take_damage"):
+					enemy.take_damage(130.0, self)
+
+func _check_legion_voices() -> void:
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if not is_instance_valid(enemy) or enemy.get("is_dead"):
+			continue
+		if global_position.distance_to(enemy.global_position) < 85.0:
+			if audio_player:
+				audio_player.pitch_scale = 0.55
+				audio_player.stream = ProceduralAudio.create_ambient_wind_sound()
+				audio_player.play()
+			break
 
 func take_damage(amount: float, attacker: Node = null) -> void:
 	if is_dead:

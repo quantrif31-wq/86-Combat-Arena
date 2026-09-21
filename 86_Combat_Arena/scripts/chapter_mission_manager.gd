@@ -81,49 +81,50 @@ func _ready() -> void:
 # ALLIED SQUADRON SPAWNER
 # =============================================================================
 func _spawn_allied_squadron() -> void:
-	# 1. Raiden Shuga ("WEHRWOLF") - Heavy vanguard defender
-	var wehrwolf = ALLIED_SCENE.instantiate()
-	wehrwolf.name = "Allied_Wehrwolf"
-	wehrwolf.callsign = "WEHRWOLF"
-	wehrwolf.pilot_name = "Raiden Shuga"
-	wehrwolf.max_hp = 140.0
-	wehrwolf.combat_speed = 7.2
-	wehrwolf.guard_radius = 42.0
+	var gam = get_node_or_null("/root/GameAppManager")
+	var player_pilot = gam.selected_pilot if gam else "undertaker"
+	var all_pilots = ["undertaker", "wehrwolf", "gunslinger"]
+	var ally_ids = []
+	for p in all_pilots:
+		if p != player_pilot:
+			ally_ids.append(p)
+			
+	var spawn_coords = [
+		Vector2(-14.0, 32.0),
+		Vector2(16.0, 35.0)
+	]
 	
-	var r_x = -14.0
-	var r_z = 32.0
-	var r_y = get_ground_elevation(r_x, r_z)
-	wehrwolf.position = Vector3(r_x, r_y + 1.2, r_z)
-	wehrwolf.base_guard_pos = Vector3(r_x, r_y, r_z)
-	add_child(wehrwolf)
-	allied_units.append(wehrwolf)
-	
-	wehrwolf.hp_changed.connect(_on_ally_hp_changed)
-	wehrwolf.radio_chatter_sent.connect(_on_radio_chatter)
-	chapter_hud.update_allies_status(wehrwolf.callsign, wehrwolf.current_hp, wehrwolf.max_hp)
-
-	# 2. Kurena Kukumila ("GUNSLINGER") - Sniper vantage support
-	var gunslinger = ALLIED_SCENE.instantiate()
-	gunslinger.name = "Allied_Gunslinger"
-	gunslinger.callsign = "GUNSLINGER"
-	gunslinger.pilot_name = "Kurena Kukumila"
-	gunslinger.max_hp = 100.0
-	gunslinger.combat_speed = 6.4
-	gunslinger.guard_radius = 55.0
-	gunslinger.attack_range = 160.0
-	gunslinger.fire_cooldown = 2.0
-	
-	var k_x = 16.0
-	var k_z = 35.0
-	var k_y = get_ground_elevation(k_x, k_z)
-	gunslinger.position = Vector3(k_x, k_y + 1.2, k_z)
-	gunslinger.base_guard_pos = Vector3(k_x, k_y, k_z)
-	add_child(gunslinger)
-	allied_units.append(gunslinger)
-	
-	gunslinger.hp_changed.connect(_on_ally_hp_changed)
-	gunslinger.radio_chatter_sent.connect(_on_radio_chatter)
-	chapter_hud.update_allies_status(gunslinger.callsign, gunslinger.current_hp, gunslinger.max_hp)
+	for i in range(ally_ids.size()):
+		var ally_id = ally_ids[i]
+		var cfg = gam.get_pilot_config(ally_id) if gam else {}
+		var ally = ALLIED_SCENE.instantiate()
+		ally.name = "Allied_" + cfg.get("callsign", "WEHRWOLF")
+		ally.callsign = cfg.get("callsign", "WEHRWOLF")
+		ally.pilot_name = cfg.get("pilot_name", "Pilot")
+		ally.max_hp = cfg.get("max_hp", 140.0)
+		ally.combat_speed = cfg.get("speed", 7.2)
+		ally.fire_cooldown = cfg.get("fire_cooldown", 2.2)
+		
+		if ally_id == "gunslinger":
+			ally.guard_radius = 55.0
+			ally.attack_range = 170.0
+		elif ally_id == "undertaker":
+			ally.guard_radius = 40.0
+			ally.attack_range = 130.0
+		else: # wehrwolf
+			ally.guard_radius = 42.0
+			ally.attack_range = 135.0
+			
+		var coord = spawn_coords[i % spawn_coords.size()]
+		var a_y = get_ground_elevation(coord.x, coord.y)
+		ally.position = Vector3(coord.x, a_y + 1.2, coord.y)
+		ally.base_guard_pos = Vector3(coord.x, a_y, coord.y)
+		add_child(ally)
+		allied_units.append(ally)
+		
+		ally.hp_changed.connect(_on_ally_hp_changed)
+		ally.radio_chatter_sent.connect(_on_radio_chatter)
+		chapter_hud.update_allies_status(ally.callsign, ally.current_hp, ally.max_hp)
 
 # =============================================================================
 # ENVIRONMENT LIGHTING CONTROLLER
