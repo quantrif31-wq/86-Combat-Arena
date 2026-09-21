@@ -1,0 +1,45 @@
+[gd_scene load_steps=5 format=3 uid="uid://c_legion_enm_01"]
+
+[ext_resource type="Script" path="res://scripts/legion_enemy.gd" id="1_legion"]
+[ext_resource type="PackedScene" path="res://assets/models/m1a4_juggernaut_enemy.glb" id="2_mesh"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_enm"]
+radius = 1.25
+height = 2.2
+
+[node name="LegionEnemy" type="CharacterBody3D" groups=["damageable", "enemy", "hostile", "legion"]]
+collision_layer = 2
+collision_mask = 3
+floor_stop_on_slope = true
+floor_constant_speed = true
+floor_max_angle = 1.0472
+floor_snap_length = 0.6
+safe_margin = 0.08
+script = ExtResource("1_legion")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("CapsuleShape3D_enm")
+
+[node name="ModelInstance" parent="." instance=ExtResource("2_mesh")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8427, -2.6)
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+volume_db = 1.5
+unit_size = 14.0
+max_distance = 120.0
+
+[node name="FootstepAudioPlayer3D" type="AudioStreamPlayer3D" parent="."]
+volume_db = -12.0
+unit_size = 5.0
+max_distance = 35.0
+
+[node name="SensorEyeLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, -1.1)
+light_color = Color(1, 0.1, 0.1, 1)
+light_energy = 3.5
+omni_range = 9.0
+omni_attenuation = 1.4

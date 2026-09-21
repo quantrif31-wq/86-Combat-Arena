@@ -1,7 +1,7 @@
 extends Node3D
 
 @onready var player: CharacterBody3D = $PlayerJuggernaut
-@onready var hud: Control = $CanvasLayer/CombatHUD
+@onready var hud: Control = get_node_or_null("CanvasLayer/CombatHUD") if has_node("CanvasLayer/CombatHUD") else get_node_or_null("CanvasLayer/ChapterHUD")
 @onready var battlefield: Node3D = get_node_or_null("Sector86_Grand_Warzone") if has_node("Sector86_Grand_Warzone") else get_node_or_null("Sector86_Forest_Ruins")
 @onready var props_root: Node3D = get_node_or_null("Props")
 @onready var ambient_audio: AudioStreamPlayer = get_node_or_null("AmbientAudioPlayer")

@@ -12,6 +12,7 @@ const SFX_SYNC = preload("res://assets/audio/pararaid_sync.wav")
 @onready var sfx_hover_player: AudioStreamPlayer = $SFXHoverPlayer
 
 # UI Nodes
+@onready var btn_chapter: Button = $LeftPanel/VBox/BtnChapter
 @onready var btn_sortie: Button = $LeftPanel/VBox/BtnSortie
 @onready var btn_briefing: Button = $LeftPanel/VBox/BtnBriefing
 @onready var btn_archive: Button = $LeftPanel/VBox/BtnArchive
@@ -51,6 +52,7 @@ func _ready() -> void:
 	tween.tween_property(fade_curtain, "modulate:a", 0.0, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	
 	# Connect buttons
+	_connect_button(btn_chapter, _on_chapter_pressed)
 	_connect_button(btn_sortie, _on_sortie_pressed)
 	_connect_button(btn_briefing, _on_briefing_pressed)
 	_connect_button(btn_archive, _on_archive_pressed)
@@ -78,7 +80,17 @@ func _play_click() -> void:
 		sfx_player.volume_db = -4.0
 		sfx_player.play()
 
+func _on_chapter_pressed() -> void:
+	if GameAppManager:
+		GameAppManager.target_scene_path = "res://scenes/chapter_1_mission.tscn"
+	_start_transition_to_loading()
+
 func _on_sortie_pressed() -> void:
+	if GameAppManager:
+		GameAppManager.target_scene_path = "res://scenes/main_arena.tscn"
+	_start_transition_to_loading()
+
+func _start_transition_to_loading() -> void:
 	if is_transitioning:
 		return
 	is_transitioning = true

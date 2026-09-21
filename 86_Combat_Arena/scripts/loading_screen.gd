@@ -1,7 +1,7 @@
 extends Control
 class_name LoadingScreen
 
-const TARGET_SCENE_PATH = "res://scenes/main_arena.tscn"
+var target_scene_path: String = "res://scenes/chapter_1_mission.tscn"
 const SFX_SYNC = preload("res://assets/audio/pararaid_sync.wav")
 
 @onready var progress_bar: ProgressBar = $CenterBox/ProgressBar
@@ -32,14 +32,13 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
 
-func _exit_tree() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
-	
-	# Start threaded loading of the main arena
-	var err = ResourceLoader.load_threaded_request(TARGET_SCENE_PATH)
+	if GameAppManager and GameAppManager.target_scene_path != "":
+		target_scene_path = GameAppManager.target_scene_path
+
+	# Start threaded loading of the target scene
+	var err = ResourceLoader.load_threaded_request(target_scene_path)
 	if err != OK:
-		push_error("Failed to start threaded loading for: " + TARGET_SCENE_PATH)
+		push_error("Failed to start threaded loading for: " + target_scene_path)
 		
 	# Play Para-RAID neural sync chime
 	if sfx_player:
@@ -57,6 +56,10 @@ func _exit_tree() -> void:
 	var tween = create_tween()
 	tween.tween_property(fade_curtain, "modulate:a", 0.0, 0.8).set_trans(Tween.TRANS_QUAD)
 
+func _exit_tree() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
+
 func _process(delta: float) -> void:
 	elapsed_time += delta
 	quote_timer += delta
@@ -70,7 +73,7 @@ func _process(delta: float) -> void:
 		q_tween.tween_property(quote_label, "modulate:a", 1.0, 0.4)
 		
 	# Poll ResourceLoader
-	var status = ResourceLoader.load_threaded_get_status(TARGET_SCENE_PATH, load_progress)
+	var status = ResourceLoader.load_threaded_get_status(target_scene_path, load_progress)
 	var real_progress: float = 0.0
 	if load_progress.size() > 0:
 		real_progress = load_progress[0]
@@ -115,8 +118,8 @@ func _on_loading_complete() -> void:
 	fade_tween.tween_property(fade_curtain, "modulate:a", 1.0, 0.7).set_trans(Tween.TRANS_SINE)
 	await fade_tween.finished
 	
-	var loaded_resource = ResourceLoader.load_threaded_get(TARGET_SCENE_PATH)
+	var loaded_resource = ResourceLoader.load_threaded_get(target_scene_path)
 	if loaded_resource is PackedScene:
 		get_tree().change_scene_to_packed(loaded_resource)
 	else:
-		get_tree().change_scene_to_file(TARGET_SCENE_PATH)
+		get_tree().change_scene_to_file(target_scene_path)

@@ -6,6 +6,8 @@ extends Node
 # game pauses, scenes change, or application exits on Windows/Linux/macOS.
 # =============================================================================
 
+var target_scene_path: String = "res://scenes/chapter_1_mission.tscn"
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	print("[GameAppManager] Initialized. OS Cursor Guard active.")
